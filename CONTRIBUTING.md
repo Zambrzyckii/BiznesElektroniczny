@@ -38,7 +38,7 @@ Kod, nazwy plików, commity, gałęzie i tytuły PR piszemy po angielsku. Opisy 
 ## Recenzje
 
 - PR wymaga akceptacji jednej osoby innej niż autor.
-- Każdy z nas musi w etapie być autorem co najmniej 3 i recenzentem co najmniej 3 scalonych PR-ów. Dlatego autor prosi o recenzję osobę z najmniejszą liczbą recenzji scalonych PR-ów. Sprawdzisz ją na liście PR filtrem `is:pr is:merged reviewed-by:<login>`.
+- Każdy z nas musi w etapie być autorem co najmniej 3 i recenzentem co najmniej 3 scalonych PR-ów. Recenzentem może być dowolna osoba z zespołu. Swoją liczbę recenzji sprawdzisz na liście PR filtrem `is:pr is:merged reviewed-by:<login>`.
 - Recenzent odpowiada w ciągu 48 godzin od prośby o recenzję.
 - Recenzja zawiera co najmniej jeden merytoryczny komentarz, np. pytanie o decyzję, wskazanie ryzyka albo opis tego, jak recenzent sprawdził zmianę. Sama akceptacja nie wystarcza.
 
