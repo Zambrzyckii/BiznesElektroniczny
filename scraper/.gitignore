@@ -1,0 +1,8 @@
+# cache stron, logi i pełny zbiór zdjęć (ten trafia do Releases jako images.zip)
+cache/
+logs/
+images/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+images.zip
