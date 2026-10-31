@@ -1,0 +1,7 @@
+requests
+beautifulsoup4
+pydantic>=2
+protego
+pillow
+pytest
+ruff
