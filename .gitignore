@@ -32,3 +32,6 @@ blob-report/
 *.swp
 .DS_Store
 Thumbs.db
+# Chwilowo ignorujemy pliki wygenerowane lokalnie (przed dokończeniem scrapera)
+scraper-results/*
+!scraper-results/.gitkeep
