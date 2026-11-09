@@ -4,3 +4,5 @@ logs/
 __pycache__/
 .pytest_cache/
 .ruff_cache/
+# raport z testów tworzony przez CI (pytest --junitxml)
+pytest-report.xml

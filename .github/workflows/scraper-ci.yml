@@ -1,0 +1,43 @@
+# Linter i testy jednostkowe scrapera dla każdego pull requesta i każdego push do main.
+
+name: Scraper CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  scraper:
+    name: Linter i testy scrapera
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: scraper
+
+    steps:
+      - name: Pobierz kod
+        uses: actions/checkout@v4
+
+      - name: Zainstaluj Pythona
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scraper/requirements.txt
+
+      - name: Zainstaluj zależności
+        run: python -m pip install -r requirements.txt
+
+      - name: Linter (ruff)
+        run: python -m ruff check .
+
+      - name: Testy (pytest)
+        run: python -m pytest -v --junitxml=pytest-report.xml
+
+      - name: Zapisz raport z testów
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: raport-testow-scrapera
+          path: scraper/pytest-report.xml
