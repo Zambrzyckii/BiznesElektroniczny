@@ -62,6 +62,8 @@ Testy E2E piszemy w Playwright 1.65.1 w TypeScript. Projekt leży w `tests/` i m
    npx playwright install chromium
    ```
 
+   Na Linuksie brakujące biblioteki systemowe instaluje `npx playwright install --with-deps chromium`.
+
 2. Uruchom testy.
 
    ```bash
