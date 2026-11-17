@@ -1,4 +1,4 @@
-# ADR 0004: Własny obraz sklepu
+# ADR 0008: Własny obraz sklepu
 
 - **Status:** zaakceptowana
 - **Data:** 2026-11-17
