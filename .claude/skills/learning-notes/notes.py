@@ -111,7 +111,7 @@ def learning_dir() -> Path:
         folder = Path(os.path.expanduser(setting)).resolve()
     else:
         main = all_checkouts[0]
-        folder = main.parent / (main.name + "-learning")
+        folder = (main.parent / (main.name + "-learning")).resolve()
     for checkout in all_checkouts:
         if folder == checkout or checkout in folder.parents:
             refuse(str(folder) + " is inside the repository checkout " + str(checkout))
@@ -120,7 +120,8 @@ def learning_dir() -> Path:
 
 def note_names(folder: Path) -> list[str]:
     names = []
-    for path in folder.rglob("*.md"):
+    paths = [*folder.glob("*.md"), *folder.glob("cards/*.md"), *folder.glob("prs/*.md")]
+    for path in paths:
         name = path.relative_to(folder).as_posix()
         if NAME_PATTERN.fullmatch(name):
             names.append(name)
@@ -144,7 +145,7 @@ def build_index(folder: Path) -> None:
     for name in names:
         if name.startswith("cards/"):
             slug = name[len("cards/"):-len(".md")]
-            tabs.append(("card-" + slug, slug, note_block(folder, name)))
+            tabs.append(("card-" + slug, slug[0].upper() + slug[1:], note_block(folder, name)))
     pr_names = [name for name in names if name.startswith("prs/")]
     if pr_names:
         blocks = ""
