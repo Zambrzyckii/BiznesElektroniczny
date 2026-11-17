@@ -27,7 +27,7 @@ services:
       DB_PASSWD: ${DB_PASSWD:?copy deploy/.env.example to deploy/.env}
       PS_INSTALL_AUTO: 1
       PS_LANGUAGE: pl
-      PS_COUNTRY: PL
+      PS_COUNTRY: pl
       PS_DOMAIN: localhost:8080
       PS_FOLDER_ADMIN: ${PS_FOLDER_ADMIN:?copy deploy/.env.example to deploy/.env}
       ADMIN_MAIL: ${ADMIN_MAIL:?copy deploy/.env.example to deploy/.env}
