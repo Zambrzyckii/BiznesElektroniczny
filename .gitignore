@@ -35,3 +35,6 @@ Thumbs.db
 # Chwilowo ignorujemy pliki wygenerowane lokalnie (przed dokończeniem scrapera)
 scraper-results/*
 !scraper-results/.gitkeep
+.claude/settings.local.json
+CLAUDE.local.md
+.claude/worktrees/
