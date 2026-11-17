@@ -16,7 +16,8 @@ Kod, nazwy plików, commity, gałęzie i tytuły PR piszemy po angielsku. Opisy 
 ## Gałęzie
 
 - Nazwa gałęzi to numer issue i krótki opis po angielsku, np. `12-add-shop-dockerfile`. W tym formacie nazwę podpowiada GitHub, gdy tworzysz gałąź ze strony issue (Development, Create a branch).
-- Gałąź tworzymy z aktualnego `main`.
+- Gałąź tworzymy z aktualnego `main`. Wyjątek opisuje następny punkt.
+- Gałąź, która potrzebuje niescalonego jeszcze issue, może wystartować z gałęzi tego issue. Jej PR kieruje się do gałęzi rodzica i do czasu scalenia rodzica pozostaje draftem. Po scaleniu rodzica robimy `git fetch` i `git rebase --onto origin/main <gałąź rodzica>`, bo po Squash and merge zwykły rebase powtórzyłby commity rodzica. Potem zmieniamy cel PR-a na `main` i dopiero wtedy klikamy Ready for review. Uzasadnienie jest w [ADR 0003](docs/adr/0003-ai-assisted-workflow.md).
 - Gałęzie `live/<login>` są zarezerwowane dla modyfikacji na żywo podczas odbioru i nie trafiają do `main`.
 - Do `main` nie wypychamy niczego bezpośrednio. Ochrona gałęzi blokuje push i force push także administratorowi.
 
@@ -47,6 +48,8 @@ Kod, nazwy plików, commity, gałęzie i tytuły PR piszemy po angielsku. Opisy 
 - PR z istotnymi fragmentami wygenerowanymi przez AI dostaje etykietę `ai-assisted`, a jego opis mówi, jak sprawdzono poprawność.
 - Kto korzystał z narzędzia AI, dodaje wpis do [docs/AI_LOG.md](docs/AI_LOG.md) w tym samym PR-ze. Minimum to 2 wpisy na osobę w etapie.
 - Do narzędzi AI nie wklejamy haseł, kluczy API ani danych dostępowych.
+- Plik `AGENTS.md` zawiera zasady dla każdego narzędzia AI. Plik `CLAUDE.md` i katalog `.claude/` z agentami i skillami to warstwa dla Claude Code. Powody opisuje [ADR 0003](docs/adr/0003-ai-assisted-workflow.md).
+- PR zbudowany z agentami z tej warstwy dostaje etykietę `ai-assisted` i wpis w [docs/AI_LOG.md](docs/AI_LOG.md), jak każdy PR z udziałem AI.
 - Za każdą linię kodu odpowiada zespół. Na obronie trzeba umieć wyjaśnić także kod napisany z pomocą AI.
 
 ## Sekrety i duże pliki
