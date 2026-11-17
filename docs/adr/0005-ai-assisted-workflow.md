@@ -1,4 +1,4 @@
-# ADR 0003: Praca zespołu z agentami AI
+# ADR 0005: Praca zespołu z agentami AI
 
 - **Status:** zaakceptowana
 - **Data:** 2026-11-17
