@@ -31,7 +31,7 @@ Shop commands (compose up, data init, backup) arrive with the issues that add `d
 
 ## Style and language
 
-The full rules are in `CONTRIBUTING.md`, except the simplicity rule below, which lives only here. These are broken most often.
+The full rules are in `CONTRIBUTING.md`, except the simplicity rule below, which is not in `CONTRIBUTING.md`. These are broken most often.
 
 - Code, file names, commits, branches and PR titles are English.
 - Write the simplest code that solves the task and is easy to read. Prefer plain loops and conditionals to clever tricks, and accept a small performance cost for that. Add no abstraction, option or layer the task does not need.
