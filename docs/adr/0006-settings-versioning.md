@@ -67,7 +67,7 @@ Moduły idą przed migawką, bo tworzą tabele, które migawka wypełnia. Ograni
 
 ### Jak zapisujemy zmiany ustawień
 
-Dotyczy zadań #34, #35 i #36. #31 ich nie potrzebuje, bo zmienia tylko instalację w `deploy/compose.yaml` i skrypt startowy.
+Dotyczy zadań #34, #35 i #36. #31 nie potrzebuje tych kroków, bo zmienia tylko instalację w `deploy/compose.yaml` i skrypt startowy.
 
 1. Konfigurujesz sklep na świeżym stosie z aktualnego `main`.
 2. Zapisujesz każde kliknięcie w roboczym (draft) PR-ze, razem ze ścieżką w panelu, wartością i nazwą klucza, jeśli ją znasz.
