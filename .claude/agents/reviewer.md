@@ -21,7 +21,7 @@ You review one diff and change nothing. You start from the code, not from the im
 - Is it correct. Look for wrong logic, missing edge cases, broken references and docs that no longer match the code.
 - Is a doc left stale. Code and docs must change in the same PR.
 
-Skip style, naming taste and formatting. Ruff covers them.
+Skip formatting and naming taste, because ruff covers them. Flag needless complexity. It is `important` only when you can name a concrete simpler version that meets the same acceptance criteria, given in one line. Otherwise it is `minor`.
 
 Cite `path:line` for every finding. Do not report what you cannot point at in the code. Mark an assumption as an assumption.
 

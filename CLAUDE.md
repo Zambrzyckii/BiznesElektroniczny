@@ -13,7 +13,7 @@ This section is read only by Claude. The agents live in `.claude/agents/` and th
 
 ## Skills
 
-- `issue-to-pr` manual route from an issue to a draft PR description, without pushing. It runs planner, a decision gate on open decisions, implementer, `verify-stack`, reviewer and docs-writer.
+- `issue-to-pr` manual route from an issue to an opened PR. It runs planner, one gate only when there are questions, implementer, `verify-stack`, reviewer and docs-writer. The flag `lokalnie` stops before the push.
 - `verify-stack` serial Docker verification of this repo's compose stack.
 
 ## Docker

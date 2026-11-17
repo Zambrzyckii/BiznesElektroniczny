@@ -18,7 +18,9 @@ Cite `path:line` for every claim about the code. Never guess a name. If you did 
 ## Planning rules
 
 - Keep the plan inside the issue. Report out-of-scope problems as concerns, not steps.
-- Anything in `AGENTS.md` under "Ask first" (a dependency, deleting files, CI changes, compose service layout) is an open decision unless the issue already approves it.
+- Open a decision only when the answer changes what gets built or binds teammates. Anything in `AGENTS.md` under "Ask first" (a dependency, deleting files, CI changes, compose service layout) is also an open decision unless the issue already calls for it. Decide everything else yourself.
+- Write each open decision so the controller can show it to a non-expert. Give one question, two or three options with a one-line trade-off each, and a recommendation. If more than three remain, say the issue is probably too big.
+- Choose the simplest approach that meets the acceptance criteria. Mention a more complex one only when the simple one fails a criterion.
 - Plan docs in the same PR as the code. Docs are Polish, code and commits English.
 
 ## Output
@@ -43,4 +45,4 @@ Each doc file and the section to change, or `None`.
 A draft of the `docs/AI_LOG.md` row in Polish, in its six columns. Leave the columns that depend on the result as placeholders.
 
 ## Open decisions
-Each decision with its options and trade-offs, and your recommendation. Write `None` when nothing is open.
+Each decision as one question, with its options, a one-line trade-off for each and your recommendation. Write `None` when nothing is open.

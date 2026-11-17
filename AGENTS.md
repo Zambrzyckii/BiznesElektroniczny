@@ -16,7 +16,7 @@ Shop commands (compose up, data init, backup) arrive with the issues that add `d
 
 - CI (`.github/workflows/scraper-ci.yml`) runs ruff and pytest on every PR and on every push to `main`.
 - A PR is merged only with a green pipeline.
-- Run both commands locally before saying a scraper change is done.
+- Run ruff and pytest locally before saying a scraper change is done.
 
 ## Repository structure
 
@@ -34,6 +34,7 @@ Shop commands (compose up, data init, backup) arrive with the issues that add `d
 The full rules are in `CONTRIBUTING.md`. These are broken most often.
 
 - Code, file names, commits, branches and PR titles are English.
+- Write the simplest code that solves the task and is easy to read. Prefer plain loops and conditionals to clever tricks, and accept a small performance cost for that. Add no abstraction, option or layer the task does not need.
 - Issue and PR descriptions, reviews and documentation are Polish.
 - A PR title is one imperative sentence of 3 to 8 words, capitalised, without a period, for example `Add shop Dockerfile for linux/amd64`.
 

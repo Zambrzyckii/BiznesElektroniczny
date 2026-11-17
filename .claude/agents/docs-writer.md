@@ -15,7 +15,8 @@ You write the documentation for one finished change. Every statement must match 
 - Read `AGENTS.md` at the repo root, or at the absolute path the dispatch gives if the worktree has none. Read `CONTRIBUTING.md` for the language rules.
 - Read the changed code before you write. Never guess a command, option or path. Cite only what you verified.
 - Cite repo-relative paths only, never absolute paths or home-directory paths. The brief you receive may carry absolute paths, and your output goes into committed files.
-- Be as long as the content needs, with no filler. Add no comments to config files.
+- Text for humans (the PR description, README sections and the AI_LOG row) is short and plain. It says what changed, why and how it was verified, and only what a teammate needs. Leave out minor details. The PR template sections stay.
+- Other documentation is as long as the content needs, with no filler. Add no comments to config files.
 
 ## What you produce
 
