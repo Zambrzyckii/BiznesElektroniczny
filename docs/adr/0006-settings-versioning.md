@@ -67,7 +67,7 @@ Moduły idą przed migawką, bo tworzą tabele, które migawka wypełnia. Ograni
 
 ### Jak zapisujemy zmiany ustawień
 
-Dotyczy zadań #31, #34, #35 i #36.
+Dotyczy zadań #31, #34, #35 i #36. W #31 kroki po scaleniu #16 (eksport, `PS_TIMEZONE` i `PS_DETECT_COUNTRY`) przechodzą do osobnego issue, bo samo #31 zmienia tylko instalację w `deploy/compose.yaml`.
 
 1. Konfigurujesz sklep na świeżym stosie z aktualnego `main`.
 2. Zapisujesz każde kliknięcie w roboczym (draft) PR-ze, razem ze ścieżką w panelu, wartością i nazwą klucza, jeśli ją znasz.
@@ -92,7 +92,7 @@ Strony CMS z #32 i #33 przechodzą przez te same kroki. Ich teksty do wklejenia 
 
 `Install.php` nie ustawia `PS_CURRENCY_DEFAULT`, ale robi to paczka lokalizacyjna. W trybie instalacji `LocalizationPack::loadLocalisationPack` zapisuje w tym kluczu id waluty z paczki, jeśli paczka ma dokładnie jedną walutę. Paczka `pl.xml` ma tylko PLN, więc domyślną walutą jest PLN (sprawdzone w #31). Kraje pochodzą z `install-dev/data/xml/country.xml`. Źródło stref nie jest sprawdzone.
 
-Klucz `PS_DETECT_COUNTRY` jest na liście, bo przy domyślnej wartości 1 sklep ustala kraj odwiedzającego z nagłówka `Accept-Language` (`FrontController::init`). Grupy podatkowe z `pl.xml` mają reguły tylko dla krajów UE, Monako i Wielkiej Brytanii. Przy przeglądarce `en-US` sklep wybiera USA, nie znajduje reguły dla USA i pokazuje ceny bez VAT. Wartość 0 ustawia osobne issue po #16, a do tego czasu przeglądarka spoza tych krajów widzi ceny netto.
+Klucz `PS_DETECT_COUNTRY` jest na liście, bo przy domyślnej wartości 1 sklep ustala kraj odwiedzającego z nagłówka `Accept-Language` (`FrontController::init`). Grupy podatkowe z `pl.xml` mają reguły tylko dla krajów UE, Monako i Wielkiej Brytanii. Przy przeglądarce `en-US` sklep bierze z nagłówka kod `US` (`Tools::getCountryIsoCodeFromHeader`), wybiera USA, które instalator tworzy jako aktywny kraj (`country.xml`), nie znajduje reguły dla USA i pokazuje ceny bez VAT. Wartość 0 ustawia osobne issue po #16, a do tego czasu przeglądarka spoza tych krajów widzi ceny netto.
 
 Tabela `ps_lang` nie jest wersjonowana i zostaje taka, jaką instalator tworzy z `PS_LANGUAGE=pl` i `PS_COUNTRY=pl` (`deploy/compose.yaml`), czyli z jednym językiem polskim. Instalator dodaje też języki z paczki lokalizacyjnej kraju, więc przy kodzie `PL` doszedłby angielski z `default.xml`. Dodanie języka pobiera pliki (`Language::downloadAndInstallLanguagePack`), co leży poza tym ADR.
 
