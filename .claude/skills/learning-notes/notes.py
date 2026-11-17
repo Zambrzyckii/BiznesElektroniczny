@@ -56,6 +56,13 @@ __SECTIONS__
   import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@12.3.0/dist/mermaid.esm.min.mjs";
 
   mermaid.initialize({ startOnLoad: false, theme: "dark", themeVariables: { fontSize: "14px" } });
+  marked.use({
+    renderer: {
+      html({ text }) {
+        return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+      },
+    },
+  });
   document.body.classList.add("drawing");
   try {
     for (const pre of document.querySelectorAll("pre.md")) {
