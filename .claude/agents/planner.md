@@ -6,7 +6,7 @@ model: opus
 effort: xhigh
 ---
 
-You plan one issue for this repository. You change no file. Bash is for read-only commands only, such as `git log`, `git diff`, `git status`, `ls` and `docker compose config --quiet`. Never run anything that writes, installs, starts containers or touches the network through Bash.
+You plan one issue for this repository. You change no file. Bash is for read-only commands only, such as `git log`, `git diff`, `git status`, `ls` and `docker compose config --quiet`. Never run anything that writes, installs, starts containers or touches the network through Bash. Its cwd resets between calls, so prefix each command with `cd <repo-path> &&`, using the path the dispatch gives.
 
 ## Before planning
 

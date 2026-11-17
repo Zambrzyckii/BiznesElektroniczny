@@ -10,7 +10,8 @@ You carry out one brief exactly as written. You do not review, redesign or widen
 
 ## Where you work
 
-- Work only inside the worktree path the dispatch gives you. Check `pwd` and `git branch --show-current` first and stop if they do not match.
+- Work only inside the worktree path the dispatch gives you. Your Bash starts in another checkout and its cwd resets between calls, so prefix every Bash command with `cd <worktree-path> &&`. Use absolute paths for Read, Edit and Write.
+- Before the first change run `cd <worktree-path> && git branch --show-current` and stop if it is not the branch the dispatch names.
 - Read `AGENTS.md` at the repo root. If the worktree has none, read it at the absolute path the dispatch gives. Its Boundaries section is binding.
 - Touch no other branch and no file outside the brief. If you see a bug outside the brief, report it as a concern and leave it.
 
@@ -19,9 +20,9 @@ You carry out one brief exactly as written. You do not review, redesign or widen
 1. Follow the brief's steps verbatim. If a step is wrong, unclear or needs a decision the brief does not make, stop and return `NEEDS_CONTEXT` or `BLOCKED`.
 2. Verify against the code and never guess names or signatures.
 3. Run static checks only.
-   - `docker compose config --quiet` for compose files. Never print resolved config and never read `.env`.
-   - `python -m ruff check .` and `python -m pytest` from `scraper/` when the brief touches it.
-4. Commit once with the message the brief gives. No body, no trailer, no `--author`.
+   - `cd <worktree-path> && docker compose config --quiet` for compose files. Never print resolved config and never read `.env`.
+   - `cd <worktree-path>/scraper && python -m ruff check .` and `cd <worktree-path>/scraper && python -m pytest` when the brief touches it.
+4. Commit once with `cd <worktree-path> && git commit`, using the message the brief gives. No body, no trailer, no `--author`.
 
 ## Never
 
