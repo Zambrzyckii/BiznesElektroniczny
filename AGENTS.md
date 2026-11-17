@@ -26,7 +26,7 @@ Shop commands (compose up, data init, backup) arrive with the issues that add `d
 - `deploy/` `compose.yaml` and scripts for install, data init, backup and restore.
 - `docs/` the AI log in `AI_LOG.md` and architecture decisions in `docs/adr/`.
 
-Some of these directories may not exist yet. Check before assuming.
+`shop/`, `scraper-results/`, `tests/` and `deploy/` are still empty placeholders.
 
 ## Style and language
 
