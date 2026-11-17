@@ -86,6 +86,6 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. The l
    - Call it with `card <component>` for each component the change built or changed.
    - Then call it with `pr <number>` and the PR number. With the local flag no PR exists, so pass the issue number.
    - Then call `map` when this run created a new card.
-   - A refusal or failure here does not stop the route and is never a question to the user.
+   - A refusal or failure here does not stop the route. When a call ends with `REFUSED:` or fails, skip the remaining notes calls and go on to the final message. It is never a question to the user.
    - With the local flag, do not push. After the final message, give the PR title and description as one separate block, because it is stored nowhere else.
    - The final message to the user has at most 5 lines. It gives the PR link, or the branch and the worktree with the local flag. It adds one sentence on what changed, what was not verified if anything, the decisions that bind teammates if any and the outcome of the wait if it ran, and one clause on the notes. Nothing else.
