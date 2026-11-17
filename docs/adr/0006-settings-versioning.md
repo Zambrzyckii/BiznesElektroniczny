@@ -24,7 +24,7 @@
 
 | Opcja | Zalety | Wady |
 |---|---|---|
-| **Migawka SQL tabel z identyfikatorami i `bin/console` dla kluczy, modułów i motywu (wybrana)** | Obejmuje każdy obszar. Identyfikatory są spójne, bo pochodzą z jednej bazy. Klucze i moduły wracają po nazwie. Nie ma w niej sekretów. | Dwa narzędzia. Każdy eksport musi pochodzić ze stosu odbudowanego z `main`. |
+| **Migawka SQL tabel z identyfikatorami i `bin/console` dla kluczy, modułów i motywu (wybrana)** | Obejmuje każdy obszar. Identyfikatory są spójne, bo pochodzą z jednej bazy. Klucze i moduły wracają po nazwie. Nie ma w niej sekretów. | Dwa narzędzia i własny skrypt SQL. Każdy eksport musi pochodzić ze stosu odbudowanego z `main`. |
 | Pełny zrzut bazy | Jedna komenda. | Zawiera `ps_customer`, `ps_employee.passwd`, `ps_webservice_account.key` i e-mail administratora, a jego diffy są nieczytelne. |
 | Eksport wybranych tabel SQL w całości, w tym `ps_configuration` i `ps_module` | Jedno narzędzie (`mariadb-dump`). | Pełna `ps_configuration` zawiera `PS_MAIL_PASSWD` i `ADMIN_MAIL`. Wiersze odtworzone po `id` trafiają na złe klucze. Wiersz w `ps_module` nie instaluje modułu. |
 | Skrypty przez Webservice API | Czytelne zmiany w PR-ach. Istnieją zasoby `carriers`, `taxes`, `tax_rule_groups`, `countries`, `zones`, `currencies`, `content_management_system` i `configurations`. | Wymaga klucza w `.env`. Nie ma zasobu dla modułów, haków ani motywu. Wymaga najwięcej kodu. |
@@ -38,7 +38,7 @@ Wybieramy migawkę SQL tabel z identyfikatorami oraz `bin/console` dla kluczy, m
 |---|---|
 | Migawka SQL | Wszystkie tabele z identyfikatorami z "Listy ustawień" (lokalizacja, przewoźnicy, CMS, menu, stopka, aliasy wyszukiwarki). Eksport to jedno uruchomienie `mariadb-dump` dla całej grupy z jednej bazy, jeden wiersz w linii (`--skip-extended-insert`, `--order-by-primary`, `--skip-dump-date`). Odtworzenie opróżnia każdą tabelę i wypełnia ją z migawki, więc wiersze instalatora są zastępowane, a nigdy łączone. Identyfikatory są spójne, bo każdy wiersz i każdy klucz pochodzi z tej samej bazy w tej samej chwili. |
 | Klucze po nazwie | Lista dozwolonych nazw odtwarzana przez `prestashop:config set`. Wartości per język (`--lang`) są w niej uwzględnione, na przykład `PS_INVOICE_FREE_TEXT`. Klucze z identyfikatorami, takie jak `PS_CURRENCY_DEFAULT`, `PS_COUNTRY_DEFAULT`, `PS_CARRIER_DEFAULT` i `PS_CONDITIONS_CMS_ID`, są eksportowane razem z migawką. |
-| Moduły po nazwie | Lista modułów z oczekiwanym stanem, odtwarzana przez `prestashop:module install`, `enable` i `disable`. Pozycje w hakach i ograniczenia płatności są zapisane przez nazwę modułu i nazwę haka. |
+| Moduły po nazwie | Lista modułów z oczekiwanym stanem, odtwarzana przez `prestashop:module install`, `enable` i `disable`. Pozycje w hakach i ograniczenia płatności odtwarza #16 własnym skryptem SQL, który dopasowuje wiersze po `ps_module.name` i `ps_hook.name`, a przewoźników po `id_reference`. |
 | Motyw | `prestashop:theme:enable`. |
 | Pliki | Logo, obrazy modułów i motyw trafiają do `shop/` (#12). |
 
@@ -49,7 +49,7 @@ Wybieramy migawkę SQL tabel z identyfikatorami oraz `bin/console` dla kluczy, m
 3. Zainstaluj i włącz moduły.
 4. Odtwórz migawkę SQL.
 5. Odtwórz klucze po nazwie.
-6. Odtwórz pozycje modułów i ograniczenia płatności.
+6. Odtwórz pozycje modułów i ograniczenia płatności skryptem SQL.
 7. Zaimportuj produkty (#17).
 
 Moduły idą przed migawką, bo tworzą tabele, które migawka wypełnia. Ograniczenia idą po niej, bo `ps_module_carrier` używa `id_reference` przewoźników, a `ps_module_country` i `ps_module_currency` używają identyfikatorów z migawki.
@@ -75,16 +75,17 @@ Dotyczy zadań #31, #34, #35 i #36.
 
 ## Lista ustawień
 
-| Obszar | Tabele lub klucze | Kto wypełnia na starcie | Dane osobowe |
+| Obszar | Tabele lub klucze | Kto wypełnia na starcie | Dane osobowe i sekrety |
 |---|---|---|---|
-| Lokalizacja (#31) | Tabele migawki `ps_currency`, `ps_currency_lang`, `ps_currency_shop`, `ps_tax`, `ps_tax_lang`, `ps_tax_rules_group`, `ps_tax_rules_group_shop`, `ps_tax_rule`, `ps_country`, `ps_country_lang`, `ps_country_shop`, `ps_zone`, `ps_zone_shop`, `ps_state`. Klucze `PS_CURRENCY_DEFAULT`, `PS_COUNTRY_DEFAULT`, `PS_LOCALE_LANGUAGE`, `PS_LOCALE_COUNTRY`, `PS_TIMEZONE`, `PS_TAX`, `PS_TAX_DISPLAY`, `PS_TAX_ADDRESS_TYPE`, `PS_WEIGHT_UNIT`. | Paczka `pl.xml` daje walutę PLN, podatki PTU PL 23%, 8%, 5% i 0, grupy "PL Standard Rate (23%)", "PL Reduced Rate (8%)", "PL Reduced Rate (5%)", "PL Exempted Rate (0%)" i "EU VAT For Virtual Products" oraz jednostki kg, L, cm, m i km. Instalator ustawia `PS_LANG_DEFAULT`, `PS_COUNTRY_DEFAULT`, `PS_LOCALE_*` i `PS_TIMEZONE`. | Brak. |
-| Przewoźnicy (#35) | Tabele migawki `ps_carrier` (w tym `max_weight`), `ps_carrier_lang`, `ps_carrier_zone`, `ps_carrier_group`, `ps_carrier_shop`, `ps_carrier_tax_rules_group_shop`, `ps_range_weight`, `ps_range_price`, `ps_delivery`. Klucze `PS_CARRIER_DEFAULT`, `PS_SHIPPING_FREE_PRICE`, `PS_SHIPPING_FREE_WEIGHT`, `PS_SHIPPING_HANDLING`, `PS_SHIPPING_METHOD`. | Instalator. | Brak. |
-| Płatności i faktury (#34) | Moduł `ps_cashondelivery`, który jest w obrazie (`composer.json`, ^2.0). Ograniczenia `ps_module_carrier`, `ps_module_country` i `ps_module_currency` zapisane przez nazwę modułu. Klucze faktur `PS_INVOICE`, `PS_INVOICE_TAXES_BREAKDOWN`, `PS_PDF_IMG_INVOICE`, `PS_INVOICE_PREFIX`, `PS_INVOICE_USE_YEAR`, `PS_INVOICE_RESET`, `PS_INVOICE_YEAR_POS`, `PS_INVOICE_START_NUMBER`, `PS_INVOICE_LEGAL_FREE_TEXT`, `PS_INVOICE_FREE_TEXT`, `PS_INVOICE_MODEL`, `PS_PDF_USE_CACHE` oraz `PS_DELIVERY_PREFIX`. Statusy zamówień. Tabela `ps_order_state` domyślnie nie jest wersjonowana. Moduł odtwarza swój status przy instalacji i zapisuje jego id w `PS_OS_COD_VALIDATION` (sprawdzone w v2.0.1). Jeśli #34 musi edytować status, do migawki dochodzą `ps_order_state` i `ps_order_state_lang`, do listy wszystkie klucze `PS_OS_*`, a pliki ikon statusów do `shop/`. | Instalator i moduł. | Brak. |
-| Menu, stopka, wyszukiwarka (#36) | Moduł `ps_mainmenu` z tabelami `ps_linksmenutop` i `ps_linksmenutop_lang` oraz kluczem `MOD_BLOCKTOPMENU_ITEMS` (sprawdzone na master 2.3.6). Moduł `ps_linklist` z tabelami `ps_link_block`, `ps_link_block_lang` i `ps_link_block_shop` (sprawdzone w v6.0.7), gdzie `content` zawiera JSON z polami `cms`, `product`, `static` i `category`. Moduł `ps_searchbar` nie ma własnych tabel ani kluczy (master 2.1.4). Klucze wyszukiwania `PS_SEARCH_MINWORDLEN`, `PS_SEARCH_BLACKLIST`, `PS_SEARCH_AJAX`, `PS_SEARCH_INDEXATION`, `PS_SEARCH_FUZZY`, `PS_SEARCH_FUZZY_MAX_LOOP`, `PS_SEARCH_MAX_WORD_LENGTH` i klucze `PS_SEARCH_WEIGHT_*`. Aliasy wyszukiwania w `ps_alias`. Informacja o cookies. Żaden moduł w obrazie nie ma "cookie" w nazwie (`composer.json` 8.2.8), a `psgdpr` nie pokazuje banera (master), więc rozwiązanie wybiera #36. Moduł spoza obrazu trafia do `shop/`, a jego tabele przechodzą przez regułę sprawdzenia. | Instalator i moduły. | Brak, poza modułem cookies, którego jeszcze nie znamy. |
-| Strony CMS | Tabele migawki `ps_cms`, `ps_cms_lang`, `ps_cms_shop`, `ps_cms_category`, `ps_cms_category_lang`, `ps_cms_category_shop`, `ps_cms_role` oraz klucz `PS_CONDITIONS_CMS_ID`. | Instalator. | Brak. |
-| Moduły | Nazwy i stany oraz pozycje w hakach według nazwy. Własne tabele modułu trafiają na listę dopiero po sprawdzeniu. | Instalator. | Brak. |
-| Motyw | `ps_shop.theme_name` przez `theme:enable`. Pliki trafiają do `shop/`. | Instalator. | Brak. |
-| Poczta | `PS_MAIL_METHOD`, `PS_MAIL_SERVER`, `PS_MAIL_SMTP_PORT`, `PS_MAIL_SMTP_ENCRYPTION`, `PS_MAIL_TYPE`, `PS_LOG_EMAILS` oraz `PS_SHOP_EMAIL` tylko z wymyślonym adresem. | Instalator. | Brak. |
+| Lokalizacja (#31) | Tabele migawki `ps_currency`, `ps_currency_lang`, `ps_currency_shop`, `ps_tax`, `ps_tax_lang`, `ps_tax_rules_group`, `ps_tax_rules_group_shop`, `ps_tax_rule`, `ps_country`, `ps_country_lang`, `ps_country_shop`, `ps_zone`, `ps_zone_shop`, `ps_state`. Klucze `PS_CURRENCY_DEFAULT`, `PS_COUNTRY_DEFAULT`, `PS_LOCALE_LANGUAGE`, `PS_LOCALE_COUNTRY`, `PS_TIMEZONE`, `PS_TAX`, `PS_TAX_DISPLAY`, `PS_TAX_ADDRESS_TYPE`, `PS_WEIGHT_UNIT`. | Paczka `pl.xml` daje walutę PLN, podatki PTU PL 23%, 8%, 5% i 0, grupy "PL Standard Rate (23%)", "PL Reduced Rate (8%)", "PL Reduced Rate (5%)", "PL Exempted Rate (0%)" i "EU VAT For Virtual Products" oraz jednostki kg, L, cm, m i km. Instalator ustawia `PS_LANG_DEFAULT`, `PS_COUNTRY_DEFAULT`, `PS_LOCALE_*` i `PS_TIMEZONE`. | Brak danych osobowych i sekretów. |
+| Przewoźnicy (#35) | Tabele migawki `ps_carrier` (w tym `max_weight`), `ps_carrier_lang`, `ps_carrier_zone`, `ps_carrier_group`, `ps_carrier_shop`, `ps_carrier_tax_rules_group_shop`, `ps_range_weight`, `ps_range_price`, `ps_delivery`. Klucze `PS_CARRIER_DEFAULT`, `PS_SHIPPING_FREE_PRICE`, `PS_SHIPPING_FREE_WEIGHT`, `PS_SHIPPING_HANDLING`, `PS_SHIPPING_METHOD`. | Instalator. | Brak danych osobowych i sekretów. |
+| Płatności i faktury (#34) | Moduł `ps_cashondelivery`, który jest w obrazie (`composer.json`, ^2.0). Ograniczenia `ps_module_carrier`, `ps_module_country` i `ps_module_currency` zapisane przez nazwę modułu. Klucze faktur `PS_INVOICE`, `PS_INVOICE_TAXES_BREAKDOWN`, `PS_PDF_IMG_INVOICE`, `PS_INVOICE_PREFIX`, `PS_INVOICE_USE_YEAR`, `PS_INVOICE_RESET`, `PS_INVOICE_YEAR_POS`, `PS_INVOICE_START_NUMBER`, `PS_INVOICE_LEGAL_FREE_TEXT`, `PS_INVOICE_FREE_TEXT`, `PS_INVOICE_MODEL`, `PS_PDF_USE_CACHE` oraz `PS_DELIVERY_PREFIX`. Statusy zamówień. Tabela `ps_order_state` domyślnie nie jest wersjonowana. Moduł odtwarza swój status przy instalacji i zapisuje jego id w `PS_OS_COD_VALIDATION` (sprawdzone w v2.0.1). Jeśli #34 musi edytować status, do migawki dochodzą `ps_order_state` i `ps_order_state_lang`, do listy wszystkie klucze `PS_OS_*`, a pliki ikon statusów do `shop/`. | Instalator i moduł. | Brak danych osobowych i sekretów. |
+| Menu, stopka, wyszukiwarka (#36) | Moduł `ps_mainmenu` z tabelami `ps_linksmenutop` i `ps_linksmenutop_lang` oraz kluczem `MOD_BLOCKTOPMENU_ITEMS` (sprawdzone na master 2.3.6). Moduł `ps_linklist` z tabelami `ps_link_block`, `ps_link_block_lang` i `ps_link_block_shop` (sprawdzone w v6.0.7), gdzie `content` zawiera JSON z polami `cms`, `product`, `static` i `category`. Moduł `ps_searchbar` nie ma własnych tabel ani kluczy (master 2.1.4). Klucze wyszukiwania `PS_SEARCH_MINWORDLEN`, `PS_SEARCH_BLACKLIST`, `PS_SEARCH_AJAX`, `PS_SEARCH_INDEXATION`, `PS_SEARCH_FUZZY`, `PS_SEARCH_FUZZY_MAX_LOOP`, `PS_SEARCH_MAX_WORD_LENGTH` i klucze `PS_SEARCH_WEIGHT_*`. Aliasy wyszukiwania w `ps_alias`. Informacja o cookies. Żaden moduł w obrazie nie ma "cookie" w nazwie (`composer.json` 8.2.8), a `psgdpr` nie pokazuje banera (master), więc rozwiązanie wybiera #36. Moduł spoza obrazu trafia do `shop/`, a jego tabele przechodzą przez regułę sprawdzenia. | Instalator i moduły. | Brak w wymienionych pozycjach. Moduł cookies i jego tabele trafiają na listę dopiero po sprawdzeniu według zasady o nowych kluczach i tabelach. |
+| Strony CMS | Tabele migawki `ps_cms`, `ps_cms_lang`, `ps_cms_shop`, `ps_cms_category`, `ps_cms_category_lang`, `ps_cms_category_shop`, `ps_cms_role` oraz klucz `PS_CONDITIONS_CMS_ID`. | Instalator. | Brak danych osobowych i sekretów. |
+| Moduły | Nazwy i stany oraz pozycje w hakach według nazwy. Własne tabele modułu trafiają na listę dopiero po sprawdzeniu. | Instalator. | Brak danych osobowych i sekretów. |
+| Motyw | `ps_shop.theme_name` przez `theme:enable`. Pliki trafiają do `shop/`. | Instalator. | Brak danych osobowych i sekretów. |
+| Pliki | Klucze `PS_LOGO`, `PS_FAVICON` i `PS_STORES_ICON` zawierają nazwy plików obrazów i trafiają na listę kluczy. Logo, favicon i obrazy modułów to pliki w `shop/` (#12). Logo przewoźnika to plik `img/s/<id_carrier>.jpg` (`_PS_SHIP_IMG_DIR_`), a `Carrier.php` kopiuje je pod nowy id przy każdym zapisie przewoźnika. Nazwa pliku jest identyfikatorem z migawki, więc te pliki eksportujemy razem z migawką, a nie ręcznie. | Instalator. | Brak danych osobowych i sekretów. |
+| Poczta | `PS_MAIL_METHOD`, `PS_MAIL_SERVER`, `PS_MAIL_SMTP_PORT`, `PS_MAIL_SMTP_ENCRYPTION`, `PS_MAIL_TYPE` i `PS_LOG_EMAILS`. | Instalator. | Brak danych osobowych i sekretów. |
 
 Założenie, którego nie sprawdziliśmy w kodzie. `Install.php` nie ustawia `PS_CURRENCY_DEFAULT`, jego domyślna wartość w `configuration.xml` to 1, a to czy id 1 jest walutą PLN sprawdza #31. Źródło krajów i stref też nie jest sprawdzone.
 
@@ -108,7 +109,7 @@ Tabela `ps_lang` nie jest wersjonowana i zostaje taka, jaką instalator tworzy z
 | `ps_search_index` i `ps_search_word` | Indeks, który sklep odbudowuje sam. |
 | `ps_shop_url`, `PS_SHOP_DOMAIN`, `PS_SHOP_DOMAIN_SSL` | Domena z `PS_DOMAIN` (`deploy/compose.yaml:31`). |
 | `PS_MAIL_USER` i `PS_MAIL_PASSWD` | Dane logowania SMTP. |
-| `PS_SHOP_EMAIL` z wartością instalatora oraz `PS_LOGS_EMAIL_RECEIVERS` | `ADMIN_MAIL`. |
+| `PS_SHOP_EMAIL` i `PS_LOGS_EMAIL_RECEIVERS` | `ADMIN_MAIL` z `deploy/.env`. |
 | `app/config/parameters.php` | Sekrety. Plik jest już ignorowany (`.gitignore:8`). |
 
 Zamówienia, koszyki i adresy też są wykluczone, bo lista jest listą dozwolonych pozycji.
@@ -125,7 +126,7 @@ Zamówienia, koszyki i adresy też są wykluczone, bo lista jest listą dozwolon
 
 ## Źródła
 
-Każde źródło sprawdzono na tagu 8.2.8, chyba że zaznaczono "gałąź 8.2.x" albo wersję modułu.
+Każde źródło sprawdzono na tagu 8.2.8, chyba że zaznaczono "gałąź 8.2.x", wersję modułu albo gałąź master. Zgodność wersji z gałęzi master z wersjami modułów w obrazie to założenie, które sprawdza #16.
 
 - https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/install-dev/data/db_structure.sql
 - https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/install-dev/data/xml/configuration.xml
@@ -135,6 +136,8 @@ Każde źródło sprawdzono na tagu 8.2.8, chyba że zaznaczono "gałąź 8.2.x"
 - https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/controllers/admin/AdminCarrierWizardController.php (`ajaxProcessFinishStep`)
 - https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/src/Adapter/Invoice/InvoiceOptionsConfiguration.php
 - https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/classes/Language.php
+- https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/config/defines.inc.php
+- https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/classes/Carrier.php
 - https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/composer.json
 - https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/src/PrestaShopBundle/Command/ConfigCommand.php
 - gałąź 8.2.x: https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.x/src/PrestaShopBundle/Command/ModuleCommand.php
