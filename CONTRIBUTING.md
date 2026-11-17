@@ -17,7 +17,7 @@ Kod, nazwy plików, commity, gałęzie i tytuły PR piszemy po angielsku. Opisy 
 
 - Nazwa gałęzi to numer issue i krótki opis po angielsku, np. `12-add-shop-dockerfile`. W tym formacie nazwę podpowiada GitHub, gdy tworzysz gałąź ze strony issue (Development, Create a branch).
 - Gałąź tworzymy z aktualnego `main`. Wyjątek opisuje następny punkt.
-- Gałąź, która potrzebuje niescalonego jeszcze issue, może wystartować z gałęzi tego issue. Jej PR kieruje się do gałęzi rodzica i do czasu scalenia rodzica pozostaje draftem. Po scaleniu rodzica robimy `git fetch` i `git rebase --onto origin/main <gałąź rodzica>`, bo po Squash and merge zwykły rebase powtórzyłby commity rodzica. Potem zmieniamy cel PR-a na `main` i dopiero wtedy klikamy Ready for review. Uzasadnienie jest w [ADR 0003](docs/adr/0003-ai-assisted-workflow.md).
+- Gałąź, która potrzebuje niescalonego jeszcze issue, może wystartować z gałęzi tego issue. Jej PR kieruje się do gałęzi rodzica i do czasu scalenia rodzica pozostaje draftem. Po scaleniu rodzica robimy `git fetch` i `git rebase --onto origin/main <gałąź rodzica>`, bo po Squash and merge zwykły rebase powtórzyłby commity rodzica. Następnie wypychamy gałąź przez `git push --force-with-lease`, zmieniamy cel PR-a na `main` i dopiero wtedy klikamy Ready for review. Uzasadnienie jest w [ADR 0003](docs/adr/0003-ai-assisted-workflow.md).
 - Gałęzie `live/<login>` są zarezerwowane dla modyfikacji na żywo podczas odbioru i nie trafiają do `main`.
 - Do `main` nie wypychamy niczego bezpośrednio. Ochrona gałęzi blokuje push i force push także administratorowi.
 

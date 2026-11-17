@@ -47,7 +47,7 @@ Przyjmujemy opcję A.
 7. **Gałęzie stosowe (uzupełnienie ADR 0002).**
    - Gałąź, która potrzebuje niescalonego issue, może wystartować z gałęzi tego issue.
    - Jej PR kieruje się do gałęzi rodzica i jest szkicem do czasu scalenia rodzica.
-   - Po scaleniu rodzica gałąź jest przenoszona na `main` przez `git rebase --onto`, cel PR-a zmienia się na `main` i dopiero wtedy PR przechodzi w Ready for review.
+   - Po scaleniu rodzica gałąź jest przenoszona na `main` przez `git rebase --onto`, wypychana przez `git push --force-with-lease`, cel PR-a zmienia się na `main` i dopiero wtedy PR przechodzi w Ready for review.
    - ADR 0002 pozostaje bez zmian. Ta reguła dodaje wyjątek od jego punktu 4 i jest zapisana w `CONTRIBUTING.md`.
 
 ## Konsekwencje
@@ -56,7 +56,7 @@ Przyjmujemy opcję A.
 - Każde narzędzie AI w zespole czyta te same zasady z `AGENTS.md`, więc mniej poprawek konwencji w recenzjach.
 - Proces pracy z agentami jest w repozytorium, więc zespół może go przejrzeć, zakwestionować i wyjaśnić na obronie.
 - Niezależny recenzent i bramka decyzyjna ograniczają ryzyko, że autor lub agent zatwierdzi własne założenia.
-- Weryfikacja Dockera jest szeregowa i oddzielona od lokalnego środowiska deweloperskiego, więc nie zajmuje pamięci równolegle z innymi stosami i nie kasuje cudzych wolumenów.
+- Weryfikacja Dockera jest szeregowa i oddzielona od lokalnego środowiska deweloperskiego, więc nie startuje obok innego stosu `be-` ani przy mniej niż 3 GiB wolnej pamięci i nie kasuje cudzych wolumenów.
 - Gałęzie stosowe pozwalają zacząć kolejne zadanie, zanim poprzednie zostanie scalone.
 
 ### Koszty i ograniczenia
