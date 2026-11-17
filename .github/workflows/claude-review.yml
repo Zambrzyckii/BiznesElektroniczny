@@ -1,4 +1,4 @@
-# Wstępna recenzja pull requesta, którą claude[bot] dodaje po otwarciu PR i na prośbę zespołu.
+# Wstępna recenzja pull requesta, którą claude[bot] dodaje dla gotowego PR i na komentarz @claude od zespołu.
 
 name: Claude Review
 
@@ -60,7 +60,7 @@ jobs:
 
             Jesteś pierwszym, automatycznym recenzentem tego pull requesta. Twoja recenzja to wstępna recenzja, a decyzje podejmują osoby z zespołu.
 
-            Przeczytaj PR przez `gh pr view`, zmianę przez `gh pr diff` i issue wskazane w `Closes #N` przez `gh issue view`. Potem przeczytaj `AGENTS.md`, `CONTRIBUTING.md` i `.github/pull_request_template.md`.
+            Przeczytaj PR przez `gh pr view --comments`, zmianę przez `gh pr diff` i issue wskazane w `Closes #N` przez `gh issue view`. Potem przeczytaj `AGENTS.md`, `CONTRIBUTING.md` i `.github/pull_request_template.md`.
 
             Sprawdź kryteria akceptacji issue jedno po drugim, granice z `AGENTS.md`, poprawność (błędna logika, brakujące przypadki brzegowe, zepsute odwołania), dokumentację, która przestała pasować do kodu, oraz wypełniony szablon PR ("Jak zweryfikowano", "Czy użyto AI").
 
