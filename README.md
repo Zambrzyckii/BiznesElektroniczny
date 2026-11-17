@@ -9,6 +9,7 @@ Projekt ma charakter edukacyjny i nie jest powiązany z właścicielem sklepu do
 - PrestaShop 8.2.8
 - Obraz Dockera `prestashop/prestashop:8.2.8-8.1-apache` z PHP 8.1
 - MariaDB 10.11 (obraz `mariadb:10.11`)
+- Mailpit 1.34.0 (obraz `axllent/mailpit:v1.34.0`)
 
 ## Uruchomienie
 
@@ -30,10 +31,13 @@ Pierwsze uruchomienie pobiera obrazy i instaluje sklep po polsku bez kreatora, c
 
 - Sklep: http://localhost:8080
 - Panel administracyjny: `http://localhost:8080/<PS_FOLDER_ADMIN>/`, logowanie wartościami `ADMIN_MAIL` i `ADMIN_PASSWD` z `deploy/.env`
+- Interfejs WWW Mailpit z pocztą wysłaną przez sklep: http://localhost:8025
 
 Compose szuka pliku `.env` w katalogu pliku podanego w `-f`, dlatego plik leży w `deploy/`. Pozostałe komendy, np. `ps`, `logs` i `down`, też wymagają `-f deploy/compose.yaml` i pliku `deploy/.env`.
 
 Dane bazy i plików sklepu leżą w nazwanych wolumenach Dockera, a nie w katalogu repozytorium. Komenda `docker compose -f deploy/compose.yaml down` zatrzymuje sklep i zachowuje dane. Wartości z `deploy/.env` działają tylko przy pierwszej instalacji. Żeby je zmienić, zacząć od czystego sklepu albo powtórzyć przerwaną pierwszą instalację, uruchom `docker compose -f deploy/compose.yaml down -v`, a potem komendę z kroku 2. Opcja `-v` usuwa wszystkie dane sklepu.
+
+Cała poczta sklepu trafia do Mailpit i nigdy na prawdziwe adresy. Ustawienia SMTP zapisuje skrypt `deploy/init-scripts/configure-mail.sh` przy starcie kontenera sklepu, więc nie wyklikujemy ich ręcznie. Mailpit trzyma wiadomości tylko do restartu swojego kontenera, dlatego nie restartuj go między rejestracją konta a pokazaniem wiadomości powitalnej. Port 8025 na hoście musi być wolny.
 
 ## Struktura repozytorium
 
