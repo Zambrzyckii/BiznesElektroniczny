@@ -41,7 +41,7 @@ Wymaganie W3 [K] mówi, że sklep działa w kontenerach Docker. W etapie 2 ten s
 
 ## Decyzja
 
-Wybieramy własny obraz sklepu zbudowany z `shop/Dockerfile`. Dodajemy cztery pliki.
+Wybieramy własny obraz sklepu zbudowany z `shop/Dockerfile`. Dodajemy pliki z tabeli.
 
 | Plik | Rola |
 |---|---|
@@ -54,7 +54,7 @@ Przyjmujemy następujące zasady.
 
 - Pliki czekają w obrazie w `/tmp/shop-files/`, a skrypt kopiuje je stamtąd do wolumenu `shop-data`.
 - Skrypty w `shop/init-scripts/` mają numeryczny prefiks. `10-` jest zajęty, a kolejne skrypty dostają wyższe numery i uruchamiają się po nim.
-- Kopiowanie robimy bez `-p`, więc zmienione pliki `.tpl` dostają nowy czas modyfikacji i Smarty kompiluje je ponownie.
+- Kopiowanie robimy bez `-p`, więc każdy kopiowany plik dostaje nowy czas modyfikacji przy każdym starcie. Po każdym restarcie Smarty kompiluje od nowa wszystkie szablony motywu.
 - Katalog motywu nie może nazywać się `classic`, bo skrypt nadpisałby domyślny motyw PrestaShop.
 - Usługa `shop` w `deploy/compose.yaml` ma `build: ../shop`, `platform: linux/amd64` i `pull_policy: build`, a nie ma klucza `image`.
 
