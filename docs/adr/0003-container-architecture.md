@@ -52,7 +52,7 @@ Wybieramy dwie usługi opisane w `deploy/compose.yaml`.
 | Usługa | Obraz | Wolumen | Port na hoście | Healthcheck |
 |---|---|---|---|---|
 | `db` | `mariadb:10.11` | `db-data:/var/lib/mysql` | brak | `healthcheck.sh --connect --innodb_initialized` |
-| `shop` | `prestashop/prestashop:8.2.8-8.1-apache` | `shop-data:/var/www/html` | `8080:80` | brak katalogu `install` i odpowiedź serwera WWW |
+| `shop` | własny z `shop/Dockerfile` (ADR 0004) | `shop-data:/var/www/html` | `8080:80` | brak katalogu `install` i odpowiedź serwera WWW |
 
 Przyjmujemy następujące zasady.
 
@@ -66,7 +66,7 @@ Przyjmujemy następujące zasady.
 
 - Wartości z `.env` działają tylko przy pierwszym starcie. MariaDB tworzy użytkownika i hasło tylko w pustym katalogu danych, a sklep instaluje się raz. Zmiana wymaga `down -v`, które usuwa dane. Zmiana samego `DB_PASSWD` sprawia, że skrypt startowy sklepu czeka na bazę bez końca.
 - Domena jest zapisana w bazie jako `PS_SHOP_DOMAIN`, `PS_SHOP_DOMAIN_SSL` i adres sklepu (`ShopUrl`). Inny port, HTTPS (#13) albo klaster w etapie 2 wymagają zmiany domeny albo reinstalacji.
-- Po pierwszym starcie `shop-data` przykrywa pliki z obrazu. Przy własnym obrazie (#12) zmiany obrazu nie trafią do istniejącego wolumenu.
+- Po pierwszym starcie `shop-data` przykrywa pliki z obrazu. Przy własnym obrazie (#12) zmiany obrazu nie trafią do istniejącego wolumenu. ADR 0004 opisuje, jak motyw i moduły własne mimo to trafiają do wolumenu przy każdym starcie.
 - Instalator wgrywa produkty demonstracyjne, bo domyślnie ma `fixtures=1`, a skrypt obrazu nie przekazuje tej opcji. Trzeba je usunąć przy imporcie danych (#17).
 - Pierwszy start trwa kilka minut, dlatego healthcheck sklepu ma `start_period` równe 10 minut.
 - Przerwana pierwsza instalacja zostawia `install.lock`, a kontener sklepu kończy się wtedy kodem 42. Rozwiązaniem jest `down -v`.

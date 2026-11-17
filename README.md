@@ -7,7 +7,7 @@ Projekt ma charakter edukacyjny i nie jest powiązany z właścicielem sklepu do
 ## Wersje
 
 - PrestaShop 8.2.8
-- Obraz Dockera `prestashop/prestashop:8.2.8-8.1-apache` z PHP 8.1
+- Obraz bazowy `prestashop/prestashop:8.2.8-8.1-apache` z PHP 8.1, z którego `shop/Dockerfile` buduje obraz sklepu dla `linux/amd64`
 - MariaDB 10.11 (obraz `mariadb:10.11`)
 
 ## Uruchomienie
@@ -26,7 +26,7 @@ Potrzebny jest Docker z Docker Compose v2. Wszystkie komendy uruchamiamy z katal
    docker compose -f deploy/compose.yaml up -d --wait
    ```
 
-Pierwsze uruchomienie pobiera obrazy i instaluje sklep po polsku bez kreatora, co może potrwać kilka minut. Komenda kończy się, gdy baza i sklep są gotowe. Instalacja wgrywa też produkty demonstracyjne PrestaShop.
+Pierwsze uruchomienie pobiera obrazy, buduje obraz sklepu z `shop/Dockerfile` i instaluje sklep po polsku bez kreatora, co może potrwać kilka minut. Obraz sklepu powstaje dla `linux/amd64`, tak jak na klastrze w etapie 2. Na Macu z Apple Silicon sklep działa w emulacji, więc start trwa dłużej. Komenda kończy się, gdy baza i sklep są gotowe. Instalacja wgrywa też produkty demonstracyjne PrestaShop.
 
 - Sklep: http://localhost:8080
 - Panel administracyjny: `http://localhost:8080/<PS_FOLDER_ADMIN>/`, logowanie wartościami `ADMIN_MAIL` i `ADMIN_PASSWD` z `deploy/.env`
@@ -34,6 +34,8 @@ Pierwsze uruchomienie pobiera obrazy i instaluje sklep po polsku bez kreatora, c
 Compose szuka pliku `.env` w katalogu pliku podanego w `-f`, dlatego plik leży w `deploy/`. Pozostałe komendy, np. `ps`, `logs` i `down`, też wymagają `-f deploy/compose.yaml` i pliku `deploy/.env`.
 
 Dane bazy i plików sklepu leżą w nazwanych wolumenach Dockera, a nie w katalogu repozytorium. Komenda `docker compose -f deploy/compose.yaml down` zatrzymuje sklep i zachowuje dane. Wartości z `deploy/.env` działają tylko przy pierwszej instalacji. Żeby je zmienić, zacząć od czystego sklepu albo powtórzyć przerwaną pierwszą instalację, uruchom `docker compose -f deploy/compose.yaml down -v`, a potem komendę z kroku 2. Opcja `-v` usuwa wszystkie dane sklepu.
+
+Motyw potomny trzymamy w `shop/themes/`, a moduły własne w `shop/modules/`. Komenda z kroku 2 za każdym razem przebudowuje obraz sklepu, a przy każdym starcie kontenera skrypt `shop/init-scripts/10-copy-shop-files.sh` kopiuje te katalogi do wolumenu `shop-data` i nadpisuje ich poprzednią wersję. Po zmianie motywu wystarczy więc ponownie uruchomić komendę z kroku 2. Plik usunięty z repozytorium zostaje w wolumenie aż do `down -v`, a zmiany tych plików zrobione w panelu znikają przy następnym starcie.
 
 ## Struktura repozytorium
 
