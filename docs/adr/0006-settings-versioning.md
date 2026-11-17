@@ -36,18 +36,18 @@ Wybieramy migawkę SQL tabel z identyfikatorami oraz `bin/console` dla kluczy, m
 
 | Mechanizm | Co obejmuje |
 |---|---|
-| Migawka SQL | Wszystkie tabele z identyfikatorami z "Listy ustawień" (lokalizacja, przewoźnicy, CMS, menu, stopka, aliasy wyszukiwarki). Eksport to jedno uruchomienie `mariadb-dump` dla całej grupy z jednej bazy, jeden wiersz w linii (`--skip-extended-insert`, `--order-by-primary`, `--skip-dump-date`). Odtworzenie opróżnia każdą tabelę i wypełnia ją z migawki, więc wiersze instalatora są zastępowane, a nigdy łączone. Identyfikatory są spójne, bo każdy wiersz i każdy klucz pochodzi z tej samej bazy w tej samej chwili. |
+| Migawka SQL | Wszystkie tabele z identyfikatorami z "Listy ustawień" (lokalizacja, przewoźnicy, CMS, menu, stopka, aliasy wyszukiwarki). Eksport to jedno uruchomienie `mariadb-dump` dla całej grupy z jednej bazy, jeden wiersz w linii (`--skip-extended-insert`, `--order-by-primary`, `--skip-dump-date`). Odtworzenie opróżnia każdą tabelę i wypełnia ją z migawki, więc wiersze instalatora są zastępowane, a nigdy łączone. Identyfikatory są spójne, bo każdy wiersz i każdy klucz pochodzi z tej samej bazy w tej samej chwili. Razem z migawką eksportujemy pliki logo przewoźników `img/s/<id_carrier>.jpg`, bo ich nazwy są identyfikatorami z migawki. Leżą w repozytorium obok plików migawki, a dokładny katalog ustala #16. |
 | Klucze po nazwie | Lista dozwolonych nazw odtwarzana przez `prestashop:config set`. Wartości per język (`--lang`) są w niej uwzględnione, na przykład `PS_INVOICE_FREE_TEXT`. Klucze z identyfikatorami, takie jak `PS_CURRENCY_DEFAULT`, `PS_COUNTRY_DEFAULT`, `PS_CARRIER_DEFAULT` i `PS_CONDITIONS_CMS_ID`, są eksportowane razem z migawką. |
 | Moduły po nazwie | Lista modułów z oczekiwanym stanem, odtwarzana przez `prestashop:module install`, `enable` i `disable`. Pozycje w hakach i ograniczenia płatności odtwarza #16 własnym skryptem SQL, który dopasowuje wiersze po `ps_module.name` i `ps_hook.name`, a przewoźników po `id_reference`. |
 | Motyw | `prestashop:theme:enable`. |
-| Pliki | Logo, obrazy modułów i motyw trafiają do `shop/` (#12). |
+| Pliki | Logo, favicon, obrazy modułów i motyw trafiają do `shop/` (#12). Logo przewoźników idą razem z migawką. |
 
 ### Kolejność przywracania
 
 1. Zainstaluj sklep (ADR 0003).
 2. Włącz motyw.
 3. Zainstaluj i włącz moduły.
-4. Odtwórz migawkę SQL.
+4. Odtwórz migawkę SQL i pliki logo przewoźników `img/s/`.
 5. Odtwórz klucze po nazwie.
 6. Odtwórz pozycje modułów i ograniczenia płatności skryptem SQL.
 7. Zaimportuj produkty (#17).
@@ -84,7 +84,7 @@ Dotyczy zadań #31, #34, #35 i #36.
 | Strony CMS | Tabele migawki `ps_cms`, `ps_cms_lang`, `ps_cms_shop`, `ps_cms_category`, `ps_cms_category_lang`, `ps_cms_category_shop`, `ps_cms_role` oraz klucz `PS_CONDITIONS_CMS_ID`. | Instalator. | Brak danych osobowych i sekretów. |
 | Moduły | Nazwy i stany oraz pozycje w hakach według nazwy. Własne tabele modułu trafiają na listę dopiero po sprawdzeniu. | Instalator. | Brak danych osobowych i sekretów. |
 | Motyw | `ps_shop.theme_name` przez `theme:enable`. Pliki trafiają do `shop/`. | Instalator. | Brak danych osobowych i sekretów. |
-| Pliki | Klucze `PS_LOGO`, `PS_FAVICON` i `PS_STORES_ICON` zawierają nazwy plików obrazów i trafiają na listę kluczy. Logo, favicon i obrazy modułów to pliki w `shop/` (#12). Logo przewoźnika to plik `img/s/<id_carrier>.jpg` (`_PS_SHIP_IMG_DIR_`), a `Carrier.php` kopiuje je pod nowy id przy każdym zapisie przewoźnika. Nazwa pliku jest identyfikatorem z migawki, więc te pliki eksportujemy razem z migawką, a nie ręcznie. | Instalator. | Brak danych osobowych i sekretów. |
+| Pliki | Klucze `PS_LOGO`, `PS_FAVICON`, `PS_STORES_ICON`, `PS_LOGO_INVOICE` i `PS_LOGO_MAIL` zawierają nazwy plików obrazów i trafiają na listę kluczy. Klucze `PS_LOGO_INVOICE` i `PS_LOGO_MAIL` pojawiają się dopiero po wgraniu logo faktury lub poczty w panelu. Logo, favicon i obrazy modułów to pliki w `shop/` (#12). Logo przewoźnika to plik `img/s/<id_carrier>.jpg` (`_PS_SHIP_IMG_DIR_`), a `Carrier.php` kopiuje je pod nowy id przy każdym zapisie przewoźnika. Nazwa pliku jest identyfikatorem z migawki, więc te pliki eksportujemy razem z migawką, a nie ręcznie. | Instalator. | Brak danych osobowych i sekretów. |
 | Poczta | `PS_MAIL_METHOD`, `PS_MAIL_SERVER`, `PS_MAIL_SMTP_PORT`, `PS_MAIL_SMTP_ENCRYPTION`, `PS_MAIL_TYPE` i `PS_LOG_EMAILS`. | Instalator. | Brak danych osobowych i sekretów. |
 
 Założenie, którego nie sprawdziliśmy w kodzie. `Install.php` nie ustawia `PS_CURRENCY_DEFAULT`, jego domyślna wartość w `configuration.xml` to 1, a to czy id 1 jest walutą PLN sprawdza #31. Źródło krajów i stref też nie jest sprawdzone.
@@ -138,12 +138,13 @@ Każde źródło sprawdzono na tagu 8.2.8, chyba że zaznaczono "gałąź 8.2.x"
 - https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/classes/Language.php
 - https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/config/defines.inc.php
 - https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/classes/Carrier.php
+- https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/classes/pdf/HTMLTemplate.php
 - https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/composer.json
 - https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/src/PrestaShopBundle/Command/ConfigCommand.php
 - gałąź 8.2.x: https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.x/src/PrestaShopBundle/Command/ModuleCommand.php
 - gałąź 8.2.x: https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.x/src/PrestaShopBundle/Command/ThemeEnablerCommand.php
 - gałąź 8.2.x: https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.x/classes/webservice/WebserviceRequest.php (`getResources`)
-- gałąź 8.2.x: https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.x/classes/Mail.php
+- https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/classes/Mail.php
 - gałąź 8.2.x: https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.x/classes/shop/Shop.php
 - https://raw.githubusercontent.com/PrestaShop/ps_linklist/v6.0.7/src/Repository/LinkBlockRepository.php
 - https://raw.githubusercontent.com/PrestaShop/ps_cashondelivery/v2.0.1/ps_cashondelivery.php
