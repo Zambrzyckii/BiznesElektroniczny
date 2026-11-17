@@ -7,12 +7,12 @@ argument-hint: <issue-number> [base-branch] [lokalnie]
 
 # issue-to-pr
 
-You are the controller. You run the route below for issue `$ARGUMENTS[0]`. Any later token `lokalnie` or `local` is the local flag and is never a base branch. The other later token, if any, is the base branch, or `origin/main` when there is none. You dispatch the agents in `.claude/agents/` and write no code yourself.
+You are the controller. You run the route below for issue `$ARGUMENTS[0]`. The later tokens are `$ARGUMENTS[1]` and `$ARGUMENTS[2]`, empty when absent. The token `lokalnie` or `local` is the local flag and is never a base branch. The other token, if any, is the base branch, or `origin/main` when there is none. The user types the bare branch name. The worktree uses `origin/<name>` and the PR uses `<name>`. You dispatch the agents in `.claude/agents/` and write no code yourself.
 
 ## Rules for the whole route
 
-- Stop for the user in exactly two cases. The first is the gate (step 4). The second is a blocked route, which is a `BLOCKED` or `NEEDS_CONTEXT` the planner cannot resolve or the fix-round cap. Never ask anything else.
-- After the gate the route runs to the end. Without the local flag it pushes and opens the PR (step 9). With the local flag it stops before the push and gives the same hand-over with the branch and the worktree instead of a link.
+- Stop for the user in exactly two cases. The first is the gate (step 4). The second is a blocked route, which is a `BLOCKED` or `NEEDS_CONTEXT` the planner cannot resolve, the fix-round cap or an issue assigned to someone else (step 1). Never ask anything else.
+- After the gate the route runs to the end. Without the local flag it pushes and opens the PR (step 9). With the local flag it stops before the push and gives the same final message with the branch and the worktree instead of a link.
 - Never create or edit an issue. Reading one is allowed. The one exception is adding the runner as assignee with `gh issue edit <n> --add-assignee @me`, after a yes at the gate.
 - Give every dispatch the absolute worktree path, the branch name and the full issue text. A subagent starts in another checkout and its cwd resets between calls.
 - A worktree branched from `origin/main` can lack `AGENTS.md` until the AI layer is merged. When it does, give every dispatch to `planner`, `implementer`, `reviewer` and `docs-writer` the absolute path of `AGENTS.md` in your own checkout as required reading.
@@ -28,9 +28,9 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. Any l
 
 2. Create the worktree.
    - Choose a branch name `<issue-number>-<short-english-slug>`.
-   - Run `git fetch origin` first, unless the user said to stay offline. When offline, branch from the existing remote-tracking base branch and say so in the hand-over.
+   - Run `git fetch origin` first, unless the user said to stay offline. When offline, branch from the existing remote-tracking base branch, or from the local branch of that name when there is none, and say so in the final message.
    - Run `git worktree add <path> -b <issue-number>-<slug> <base branch>` from your checkout. Put `<path>` outside the checkout, next to it.
-   - The base branch defaults to `origin/main`. When the user gives another branch, this is a stacked branch (see step 9).
+   - The base branch defaults to `origin/main`. When the user gives another branch, the base branch is `origin/<name>` and this is a stacked branch (see step 9).
    - Do not rely on the agent `isolation` default. The worktree is always created here, so every agent works on a known path and branch.
 
 3. Dispatch `planner`.
@@ -42,7 +42,7 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. Any l
    - Collect everything that needs the user into one message. That is the planner's open decisions and the assignee question from step 1.
    - If there is nothing, do not stop and go to step 5.
    - Write the message in plain Polish. Ask one short question per decision, give each option a one-line trade-off and put the recommendation first. Add no plan summary and no minor findings.
-   - After a yes to the assignee question, run `gh issue edit <n> --add-assignee @me`.
+   - After a yes to the assignee question, run `gh issue edit <n> --add-assignee @me`. After a no, stop.
    - Put the answers into the brief before step 5. Anything in the planner's "Ask first" list that the user did not approve stays out of the plan.
    - Mark the answers that bind teammates, such as the settings method or the ports. They are flagged in the PR description for team discussion (steps 8 and 9).
 
@@ -77,5 +77,5 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. Any l
      - A stacked branch is a draft until its parent merges, as `CONTRIBUTING.md` requires. Run `gh pr create --draft --base <parent-branch>`, and the description names the parent branch.
      - The change touches `deploy/` or `shop/` and `verify-stack` returned `VERIFY: SKIPPED`. The draft carries the reason in one line. Untested Docker changes never go out as ready.
    - Do not wait for CI.
-   - With the local flag, do not push. Give the branch name, the worktree path, the commit list, the PR description and the AI_LOG row.
+   - With the local flag, do not push. After the final message, give the PR description as one separate block, because it is stored nowhere else.
    - The final message to the user has at most 5 lines. It gives the PR link, or the branch and the worktree with the local flag. It adds one sentence on what changed, what was not verified if anything and the decisions that bind teammates if any. Nothing else.
