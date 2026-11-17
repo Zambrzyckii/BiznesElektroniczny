@@ -60,7 +60,7 @@ Skrypt `scraper/import_categories.py` używa `PS_WS_KEY` i opcjonalnie `PS_SHOP_
 
 | Katalog | Zawartość |
 |---|---|
-| `shop/` | Kod sklepu, motyw i moduły własne, Dockerfile, teksty stron CMS w `shop/cms/` do wklejenia w panelu |
+| `shop/` | Kod sklepu, motyw i moduły własne, Dockerfile |
 | `scraper/` | Scraper i jego testy |
 | `scraper-results/` | Wyniki scrapowania w UTF-8 z adresami zdjęć i do 20 przykładowych zdjęć |
 | `tests/` | Testy E2E w Playwright |
