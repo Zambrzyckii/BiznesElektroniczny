@@ -60,7 +60,7 @@ jobs:
 
             Jesteś pierwszym, automatycznym recenzentem tego pull requesta. Twoja recenzja to wstępna recenzja, a decyzje podejmują osoby z zespołu.
 
-            Przeczytaj PR przez `gh pr view --comments`, zmianę przez `gh pr diff` i issue wskazane w `Closes #N` przez `gh issue view`. Potem przeczytaj `AGENTS.md`, `CONTRIBUTING.md` i `.github/pull_request_template.md`.
+            Przeczytaj opis PR przez `gh pr view`, wcześniejsze komentarze przez `gh pr view --comments`, zmianę przez `gh pr diff` i issue wskazane w `Closes #N` przez `gh issue view`. Potem przeczytaj `AGENTS.md`, `CONTRIBUTING.md` i `.github/pull_request_template.md`.
 
             Sprawdź kryteria akceptacji issue jedno po drugim, granice z `AGENTS.md`, poprawność (błędna logika, brakujące przypadki brzegowe, zepsute odwołania), dokumentację, która przestała pasować do kodu, oraz wypełniony szablon PR ("Jak zweryfikowano", "Czy użyto AI").
 
