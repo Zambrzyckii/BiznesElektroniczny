@@ -39,7 +39,7 @@ Dane bazy i plików sklepu leżą w nazwanych wolumenach Dockera, a nie w katalo
 
 | Katalog | Zawartość |
 |---|---|
-| `shop/` | Kod sklepu, motyw i moduły własne, Dockerfile, teksty stron CMS w `shop/cms/` do wklejenia w panelu |
+| `shop/` | Kod sklepu, motyw i moduły własne, Dockerfile |
 | `scraper/` | Scraper i jego testy |
 | `scraper-results/` | Wyniki scrapowania w UTF-8 z adresami zdjęć i do 20 przykładowych zdjęć |
 | `tests/` | Testy E2E w Playwright |
