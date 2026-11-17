@@ -5,7 +5,7 @@
 
 ## Kontekst
 
-Wąskim gardłem jest czas do pierwszej recenzji, bo recenzent ma na odpowiedź 48 godzin (`CONTRIBUTING.md:42`). Zasady przedmiotu się nie zmieniają. Każdy PR nadal wymaga recenzji osoby z zespołu z co najmniej jednym merytorycznym komentarzem (`CONTRIBUTING.md:40-43`), a prowadzący liczy `reviewed-by:` ręcznie. Issue powołuje się na W1 i D5.
+Wąskim gardłem jest czas do pierwszej recenzji, bo recenzent ma na odpowiedź 48 godzin (sekcja „Recenzje” w `CONTRIBUTING.md`). Zasady przedmiotu się nie zmieniają. Każdy PR nadal wymaga recenzji osoby z zespołu z co najmniej jednym merytorycznym komentarzem (ta sama sekcja), a prowadzący liczy `reviewed-by:` ręcznie. Issue powołuje się na W1 i D5.
 
 Zespół używa trzech narzędzi AI, a recenzje piszemy po polsku. Bot ma więc skrócić czas do pierwszej informacji zwrotnej, a nie zastąpić człowieka. Działa na GitHubie niezależnie od narzędzi, których każdy z nas używa lokalnie.
 
