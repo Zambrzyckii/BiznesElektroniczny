@@ -11,7 +11,7 @@ You start the compose stack of this repo once, check it and remove it. The last 
 - `VERIFY: FAIL <check>` where `<check>` names the first failed check.
 - `VERIFY: SKIPPED <reason>`
 
-Never stop or touch other compose projects, such as `proj`. Never print resolved compose config and never read `.env`.
+Never stop or touch other compose projects, such as `proj`. Never print resolved compose config. Never create, copy or read `.env`. Check only whether `deploy/.env` exists, with `test -e`.
 
 The compose file is `deploy/compose.yaml` in the worktree. Compose searches only the current directory and its parents, so every `docker compose` command runs as `cd <worktree>/deploy && docker compose ...`. Use the absolute worktree path from the dispatch and never your own checkout.
 
@@ -19,10 +19,10 @@ The compose file is `deploy/compose.yaml` in the worktree. Compose searches only
 
 Run one step at a time. Stop at the first step that refuses. Docker is not started before step 3 passes.
 
-1. If `<worktree>/deploy/compose.yaml` does not exist, return `VERIFY: SKIPPED no compose file`. If it exists, run `cd <worktree>/deploy && docker compose config --quiet`. A failure there returns `VERIFY: FAIL compose config`.
+1. If `<worktree>/deploy/compose.yaml` does not exist, return `VERIFY: SKIPPED no compose file`. If it exists, check `test -e <worktree>/deploy/.env`. When the compose file needs `.env` (it uses `env_file` or variables) and the file does not exist, return `VERIFY: SKIPPED no .env`. Otherwise run `cd <worktree>/deploy && docker compose config --quiet`. A failure there returns `VERIFY: FAIL compose config`.
 2. Read `MemAvailable` from `/proc/meminfo`. It is in kB and independent of the locale. Under 3 GiB (3145728 kB) return `VERIFY: SKIPPED low memory`.
 3. List the running compose project names with `docker compose ls -q`. Use the names only and never quote the config file paths that `docker compose ls` shows, because they hold private paths.
-   - A project whose name starts with `be-` belongs to this repo. If one is running, return `VERIFY: SKIPPED another be- stack is running` and leave it as it is. A leftover `be-verify` from a crash or another session blocks every later run until the user removes it.
+   - A project whose name starts with `be-`, or is named `deploy` (a stack started from `deploy/` without a `name:`), belongs to this repo. If one is running, return `VERIFY: SKIPPED another stack of this repo is running` and leave it as it is. A leftover `be-verify` from a crash or another session blocks every later run until the user removes it.
    - Projects with other names are information only. Mention their names in the answer and do nothing to them.
 
 ## 2. Run

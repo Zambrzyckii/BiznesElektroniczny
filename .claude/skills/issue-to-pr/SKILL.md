@@ -26,12 +26,14 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. The b
 
 2. Create the worktree.
    - Choose a branch name `<issue-number>-<short-english-slug>`.
+   - Run `git fetch origin` first, unless the user said to stay offline. When offline, branch from the existing `origin/main` and say so in the hand-over.
    - Run `git worktree add <path> -b <issue-number>-<slug> <base branch>` from your checkout. Put `<path>` outside the checkout, next to it.
    - The base branch defaults to `origin/main`. When the user gives another branch, this is a stacked branch (see step 9).
    - Do not rely on the agent `isolation` default. The worktree is always created here, so every agent works on a known path and branch.
 
 3. Dispatch `planner`.
    - Brief: the issue text, the repo path to read, and the `AGENTS.md` path when the worktree lacks one.
+   - The planner has no shell. Pass it the git facts it needs: the base branch and its commit, and the relevant `git log` or changed files.
    - It returns the sections Files, Steps, Acceptance checks, Verification, Docs to update, AI_LOG row draft and Open decisions.
 
 4. Decision gate.
@@ -51,7 +53,7 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. The b
    - `VERIFY: SKIPPED <reason>` is recorded in the PR description as not verified, with the reason.
 
 7. Dispatch `reviewer`.
-   - The reviewer has only Read, Grep and Glob, so it cannot run git. Prepare its input first. From the worktree, write one file with `git log --oneline <base>..HEAD`, then `git diff --stat <base>..HEAD`, then `git diff -U10 <base>..HEAD`. Put it in a temp path (`mktemp`) or in a git-ignored scratch area of the worktree, never in a tracked path.
+   - The reviewer has only Read, Grep and Glob, so it cannot run git. Prepare its input first. From the worktree, write one file with `git log --oneline <base>..HEAD`, then `git diff --stat <base>..HEAD`, then `git diff -U10 <base>..HEAD`. Put it in a `mktemp` path, never in the worktree.
    - Dispatch with that file path, the issue's acceptance criteria, the worktree path and the `AGENTS.md` path when the worktree lacks one. Do not pass the implementer's conclusions.
    - `Verdict: APPROVE` moves on, with the minors noted.
    - `Verdict: CHANGES_REQUESTED` starts a fix round. Send the findings to `implementer` as a new brief with worktree path and branch, rerun `verify-stack` if it applied, regenerate the review file and dispatch `reviewer` again.
@@ -59,6 +61,7 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. The b
 
 8. Dispatch `docs-writer`.
    - Brief: the issue number, the Docs to update section, the implementer's and reviewer's reports, the `verify-stack` result, the planner's AI_LOG row draft, the `AGENTS.md` path when the worktree lacks one and the decisions that bind teammates.
+   - Also pass "Data i autor" (the date, the user's name and GitHub login) and "Narzędzie i model" (the tool and the models that actually ran).
    - It edits the docs in the worktree and returns the PR description and the AI_LOG row.
    - Commit its doc edits on the branch if the implementer's commit does not include them. Add the AI_LOG row to `docs/AI_LOG.md` in the same PR.
 
@@ -66,5 +69,5 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. The b
    - Give the user the branch name, the worktree path, the commit list, the PR description and the AI_LOG row.
    - List the decisions that bind teammates in the PR description, flagged for team discussion.
    - The PR is a draft. Its title is one imperative English sentence of 3 to 8 words, and its description is Polish with `Closes #N` first.
-   - A stacked branch's PR stays a draft until its parent merges, and its description names the parent branch.
+   - A stacked branch's PR stays a draft until its parent merges, and its description names the parent branch. It targets the parent branch (`gh pr create --base <parent-branch>`, only on the user's explicit instruction), as `CONTRIBUTING.md` requires.
    - Push, `gh pr create` and the `ai-assisted` label happen only on the user's explicit instruction.

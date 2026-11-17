@@ -6,6 +6,7 @@ University team project (4 people). A PrestaShop 8.2 shop in Docker, a Python sc
 
 Run from `scraper/`.
 
+- Install: `python -m pip install -r requirements.txt`
 - Lint: `python -m ruff check .`
 - Tests: `python -m pytest`
 
@@ -30,7 +31,7 @@ Shop commands (compose up, data init, backup) arrive with the issues that add `d
 
 ## Style and language
 
-The full rules are in `CONTRIBUTING.md`. These two are broken most often.
+The full rules are in `CONTRIBUTING.md`. These are broken most often.
 
 - Code, file names, commits, branches and PR titles are English.
 - Issue and PR descriptions, reviews and documentation are Polish.
@@ -39,11 +40,11 @@ The full rules are in `CONTRIBUTING.md`. These two are broken most often.
 ## Git and pull requests
 
 - Every task has an issue first. Do not work on an issue that has no assignee.
-- Branch from current `main`, named `<issue-number>-<short-english-slug>`, for example `12-add-shop-dockerfile`.
+- Branch from current `main`, or from an unmerged parent issue branch under the stacked-branch rule in `CONTRIBUTING.md`. Name it `<issue-number>-<short-english-slug>`, for example `12-add-shop-dockerfile`.
 - One PR closes one issue. Put `Closes #N` in the description.
 - Fill `.github/pull_request_template.md`, including "Jak zweryfikowano" and "Czy użyto AI".
 - A PR with significant AI-generated parts gets the `ai-assisted` label.
-- Add the matching row to `docs/AI_LOG.md` in the same PR.
+- Anyone who used AI adds a row to `docs/AI_LOG.md` in the same PR.
 - Open unfinished work as a draft PR.
 - Commits on the branch can be rough. The PR is squash-merged and only its title remains.
 
@@ -51,7 +52,7 @@ The full rules are in `CONTRIBUTING.md`. These two are broken most often.
 
 ### Always
 
-- Verify before saying done. Run the lint and tests, and show the output.
+- Verify before saying done. Run the checks that cover the change and show the output (ruff and pytest for scraper changes).
 - Change the docs in the same PR as the code they describe. A PR that changes how the shop starts updates the "Uruchomienie" section of `README.md`.
 - Add new generated files to `.gitignore` and new environment variables to `.env.example`.
 
@@ -67,5 +68,6 @@ The full rules are in `CONTRIBUTING.md`. These two are broken most often.
 - Read or print `.env`, or print resolved compose config. `docker compose config` is allowed only with `--quiet`.
 - Commit secrets, files over 10 MB or the full set of product images.
 - Paste passwords, API keys or access data into an AI tool.
-- Push to `main` or force push anywhere. Branch protection blocks it anyway.
+- Push to `main`.
+- Force push, except `git push --force-with-lease` on a feature branch when a human asks for it after a stacked-branch rebase.
 - Approve or merge PRs. The author merges after a human review.

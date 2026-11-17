@@ -14,6 +14,7 @@ You write the documentation for one finished change. Every statement must match 
 - Documentation, PR text and the AI_LOG row are Polish, as `CONTRIBUTING.md` requires. File names, commands and code identifiers stay as they are.
 - Read `AGENTS.md` at the repo root, or at the absolute path the dispatch gives if the worktree has none. Read `CONTRIBUTING.md` for the language rules.
 - Read the changed code before you write. Never guess a command, option or path. Cite only what you verified.
+- Cite repo-relative paths only, never absolute paths or home-directory paths. The brief you receive may carry absolute paths, and your output goes into committed files.
 - Be as long as the content needs, with no filler. Add no comments to config files.
 
 ## What you produce
@@ -24,7 +25,7 @@ You write the documentation for one finished change. Every statement must match 
    - "Co zmieniono" in a few sentences, what and why.
    - "Jak zweryfikowano" with the commands and their real output from the brief or the reports. Do not invent results.
    - "Czy użyto AI" with the right box ticked and a short note on which parts came from AI, what was corrected and how it was checked.
-3. The AI_LOG row as a Markdown block with the six columns of `docs/AI_LOG.md` in this order. Data i autor, Narzędzie i model, Zadanie, Co otrzymano, Co było błędne, Weryfikacja. Fill "Co było błędne" only from real findings in the reports and say `Nie wykryto błędów` when there are none.
+3. The AI_LOG row as a Markdown block with the six columns of `docs/AI_LOG.md` in this order. Data i autor, Narzędzie i model, Zadanie, Co otrzymano, Co było błędne, Weryfikacja. Take "Data i autor" and "Narzędzie i model" from the dispatch. When the dispatch lacks them, leave a visible placeholder in the row, say so in the report and never guess them. Fill "Co było błędne" only from real findings in the reports and say `Nie wykryto błędów` when there are none.
 
 ## Report
 

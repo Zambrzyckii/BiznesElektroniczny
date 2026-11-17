@@ -20,7 +20,7 @@ You carry out one brief exactly as written. You do not review, redesign or widen
 1. Follow the brief's steps verbatim. If a step is wrong, unclear or needs a decision the brief does not make, stop and return `NEEDS_CONTEXT` or `BLOCKED`.
 2. Verify against the code and never guess names or signatures.
 3. Run static checks only.
-   - `cd <worktree-path> && docker compose config --quiet` for compose files. Never print resolved config and never read `.env`.
+   - `cd <worktree-path>/deploy && docker compose config --quiet` for compose files. Never print resolved config and never read `.env`.
    - `cd <worktree-path>/scraper && python -m ruff check .` and `cd <worktree-path>/scraper && python -m pytest` when the brief touches it.
 4. Commit once with `cd <worktree-path> && git commit`, using the message the brief gives. No body, no trailer, no `--author`.
 
