@@ -15,6 +15,7 @@ This section is read only by Claude. The agents live in `.claude/agents/` and th
 
 - `issue-to-pr` manual route from an issue to an opened PR. It runs planner, one gate only when there are questions, implementer, `verify-stack`, reviewer and docs-writer. The flag `lokalnie` stops before the push.
 - `verify-stack` serial Docker verification of this repo's compose stack.
+- `ready-pr` manual, after a parent PR is merged. It moves the branch onto `main`, marks the PR ready, waits up to about 10 minutes for CI and the review bot and fixes their valid points in one round.
 
 ## Docker
 

@@ -1,6 +1,6 @@
 ---
 name: issue-to-pr
-description: Manual route from one issue to an opened PR. Creates a worktree, then runs planner, one gate only when there are questions, implementer, verify-stack, reviewer and docs-writer.
+description: Manual route from one issue to an opened PR. Creates a worktree, then runs planner, one gate only when there are questions, implementer, verify-stack, reviewer and docs-writer, and waits for the checks of a ready PR.
 disable-model-invocation: true
 argument-hint: <issue-number> [base-branch] [lokalnie]
 ---
@@ -31,6 +31,7 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. The l
    - Run `git fetch origin` first. With the local flag, run no fetch.
    - Run `git worktree add <path> -b <issue-number>-<slug> <base branch>` from your checkout. Put `<path>` outside the checkout, next to it.
    - The base branch defaults to `origin/main`. When the user gives another branch, this is a stacked branch (see step 9). Without the local flag, if `origin/<name>` does not exist, stop and tell the user in one line to push the parent first.
+   - `verify-stack` needs `deploy/.env`, which git does not carry. If the new worktree lacks it, copy it with `cp` from the worktree of the base branch, or else from any other worktree in `git worktree list` that has one (check with `test -e`). Never read or print the file.
    - Do not rely on the agent `isolation` default. The worktree is always created here, so every agent works on a known path and branch.
 
 3. Dispatch `planner`.
@@ -76,6 +77,6 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. The l
    - The PR is ready for review, except in two cases where it is a draft.
      - A stacked branch is a draft until its parent merges, as `CONTRIBUTING.md` requires. Run `gh pr create --draft --base <parent-branch>`, and the description names the parent branch.
      - The change touches `deploy/` or `shop/` and `verify-stack` returned `VERIFY: SKIPPED`. The draft carries the reason in one line. Untested Docker changes never go out as ready.
-   - Do not wait for CI.
+   - A PR opened as ready goes through the section "3. Wait and react" of `${CLAUDE_SKILL_DIR}/../ready-pr/SKILL.md`. Read that file and follow only that section. It waits up to about 10 minutes for CI and the review bot and fixes their valid points in one round. A draft gets no bot review, so the route does not wait for it.
    - With the local flag, do not push. After the final message, give the PR title and description as one separate block, because it is stored nowhere else.
-   - The final message to the user has at most 5 lines. It gives the PR link, or the branch and the worktree with the local flag. It adds one sentence on what changed, what was not verified if anything and the decisions that bind teammates if any. Nothing else.
+   - The final message to the user has at most 5 lines. It gives the PR link, or the branch and the worktree with the local flag. It adds one sentence on what changed, what was not verified if anything, the decisions that bind teammates if any and the outcome of the wait if it ran. Nothing else.
