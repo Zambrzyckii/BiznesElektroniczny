@@ -44,4 +44,4 @@ You are the controller for the PR of issue `$ARGUMENTS[0]`. You run git and gh y
 4. Sort every point into fix or skip. Fix a real problem inside this issue's scope and every failed check. Skip a point that is wrong, out of scope or a matter of taste, with a one-line reason.
 5. If anything is to fix, dispatch `implementer` once with the points, the worktree path and the branch. Rerun `verify-stack` when the fix touches `deploy/` or `shop/`, then `git push`. Wait once more as in step 1 and report a new failure without fixing it.
 6. Never post `@claude`, never reply on GitHub and never resolve threads. Replies would appear under the user's account.
-7. The final message has at most 5 lines. It gives the PR link, the points fixed, the points skipped with their reasons and anything left for the user.
+7. The final message has at most 5 lines. It gives the PR link, the points fixed, the points skipped with their reasons and anything left for the user. When `issue-to-pr` runs this section, skip this step. The route carries the outcome into its own final message and goes on with its next step.
