@@ -2,6 +2,7 @@
 
 - **Status:** zaakceptowana
 - **Data:** 2026-11-17
+- **Uwaga:** [ADR 0007](0007-https-proxy.md) zastępuje port `8080:80` i domenę `localhost:8080` z tego dokumentu. Sklep jest dostępny tylko przez proxy HTTPS.
 
 ## Kontekst
 
