@@ -35,6 +35,7 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. The l
    - Do not rely on the agent `isolation` default. The worktree is always created here, so every agent works on a known path and branch.
 
 3. Dispatch `planner`.
+   - First look at work running next to this issue, because git does not flag two branches that pick the same ADR number or container path. List the open PRs with `gh pr list --state open --json number,headRefName,files` (read-only, allowed with the local flag too) and the other issue worktrees in `git worktree list`. Give the planner their changed files and the highest ADR number found in `docs/adr/` of the base branch, those PRs and those worktrees, so it takes the next free one.
    - Brief: the issue text, the repo path to read, and the `AGENTS.md` path when the worktree lacks one.
    - The planner has no shell. Pass it the base branch and its commit, and the relevant `git log` or changed files.
    - It returns the sections Files, Steps, Acceptance checks, Verification, Docs to update, AI_LOG row draft and Open decisions.
@@ -60,6 +61,7 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. The l
 
 7. Dispatch `reviewer`.
    - The reviewer has only Read, Grep and Glob, so it cannot run git. Prepare its input first. From the worktree, write one file with `git log --oneline <base>..HEAD`, then `git diff --stat <base>..HEAD`, then `git diff -U10 <base>..HEAD`. Put it in a `mktemp` path, never in the worktree.
+   - Append to that file the changes of open PRs and other issue worktrees that touch the same files (`gh pr diff <number>` or `git diff <base>...<branch> -- <files>`). Ask the reviewer to look for collisions that git does not flag, such as the same container path, port, volume, ADR number, environment variable or setting.
    - Dispatch with that file path, the issue's acceptance criteria, the worktree path and the `AGENTS.md` path when the worktree lacks one. Do not pass the implementer's conclusions.
    - `Verdict: APPROVE` moves on, with the minors noted.
    - `Verdict: CHANGES_REQUESTED` starts a fix round. Send the findings to `implementer` as a new brief with worktree path and branch, rerun `verify-stack` if it applied, regenerate the review file and dispatch `reviewer` again.

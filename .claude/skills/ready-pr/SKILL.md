@@ -24,8 +24,9 @@ You are the controller for the PR of issue `$ARGUMENTS[0]`. You run git and gh y
 4. If `C` is still in the branch (`git merge-base --is-ancestor C HEAD` succeeds), run `git rebase --onto origin/main C`. Otherwise run `git rebase origin/main`. After Squash and merge the parent's commits sit in `main` under a new hash, so only this issue's commits may be replayed. `C` stays correct even when the parent branch was rebased later.
 5. A conflict only in the table rows of `docs/AI_LOG.md` is yours to resolve. Keep the rows from `main` first and this branch's row last, run `git add docs/AI_LOG.md` and `GIT_EDITOR=true git rebase --continue`. Any other conflict means `git rebase --abort` and a stop with the list of conflicted files.
 6. When `git diff --name-only origin/main...HEAD` touches `deploy/` or `shop/`, run `verify-stack` with the worktree path. Any result other than `VERIFY: PASS` stops the skill with that line, before the push.
-7. When `git rev-parse HEAD` differs from `git rev-parse origin/<branch>`, the branch needs a force push, and only the user runs it. Give him this exact line and wait until he says it is done: `! cd <worktree> && git push --force-with-lease origin <branch>`.
-8. If the PR base is not `main`, run `gh pr edit <number> --base main`. If the PR is a draft, run `gh pr ready <number>`. That starts the review bot when its workflow is on `main`.
+7. Check the other open PRs that change any file this branch changes (`gh pr list --state open --json number,headRefName,files`). Read their changes to those files with `gh pr diff <number>` and look for collisions that git does not flag, such as the same container path, port, volume, ADR number, environment variable or setting. If one would break this branch or the other one once both are merged, stop and tell the user which PRs and lines collide.
+8. When `git rev-parse HEAD` differs from `git rev-parse origin/<branch>`, the branch needs a force push, and only the user runs it. Give him this exact line and wait until he says it is done: `! cd <worktree> && git push --force-with-lease origin <branch>`.
+9. If the PR base is not `main`, run `gh pr edit <number> --base main`. If the PR is a draft, run `gh pr ready <number>`. That starts the review bot when its workflow is on `main`.
 
 ## 3. Wait and react
 
