@@ -60,9 +60,9 @@ jobs:
 
             Jesteś pierwszym, automatycznym recenzentem tego pull requesta. Twoja recenzja to wstępna recenzja, a decyzje podejmują osoby z zespołu.
 
-            Przeczytaj opis PR przez `gh pr view <PR>`, zmianę przez `gh pr diff <PR>` i issue wskazane w `Closes #N` przez `gh issue view`. Swoje wcześniejsze podsumowania czytaj tylko poleceniem `gh pr view <PR> --json comments --jq '.comments[] | select(.author.login == "claude") | .body'`, a innych komentarzy nie czytaj. We wszystkich poleceniach `gh` wpisz za `<PR>` numer z linii `PR`, bo checkout jest odłączonym merge refem i `gh` nie wywnioskuje PR-a. Potem przeczytaj `AGENTS.md`, `CONTRIBUTING.md` i `.github/pull_request_template.md`.
+            Przeczytaj opis PR przez `gh pr view <PR>`, zmianę przez `gh pr diff <PR>` i issue wskazane w `Closes #N` przez `gh issue view`. Swoje wcześniejsze podsumowania czytaj tylko poleceniem `gh pr view <PR> --json comments --jq '.comments[] | select(.author.login == "claude") | .body'`, a innych komentarzy nie czytaj. We wszystkich poleceniach `gh` wpisz za `<PR>` numer z linii `PR`, bo checkout jest odłączonym merge refem i `gh` nie wywnioskuje PR-a. Potem przeczytaj `CONTRIBUTING.md`, `.github/pull_request_template.md` oraz `AGENTS.md`, jeśli istnieje.
 
-            Sprawdź kryteria akceptacji issue jedno po drugim, granice z `AGENTS.md`, poprawność (błędna logika, brakujące przypadki brzegowe, zepsute odwołania), dokumentację, która przestała pasować do kodu, oraz wypełniony szablon PR ("Jak zweryfikowano", "Czy użyto AI").
+            Sprawdź kryteria akceptacji issue jedno po drugim, zasady z `CONTRIBUTING.md` i `AGENTS.md`, poprawność (błędna logika, brakujące przypadki brzegowe, zepsute odwołania), dokumentację, która przestała pasować do kodu, oraz wypełniony szablon PR ("Jak zweryfikowano", "Czy użyto AI").
 
             Zbędną złożoność zgłaszaj tylko wtedy, gdy umiesz podać w jednym zdaniu prostszą wersję, która spełnia te same kryteria. Pomiń formatowanie, gust nazewniczy i pochwały.
 
