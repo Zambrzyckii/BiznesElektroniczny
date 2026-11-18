@@ -28,7 +28,7 @@ Przyjmujemy opcję A.
 1. **Układ plików.**
    - `AGENTS.md` zawiera zasady dla każdego narzędzia AI.
    - `CLAUDE.md` zaczyna się od `@AGENTS.md` i dodaje tylko reguły specyficzne dla Claude Code.
-   - `.claude/agents/` zawiera czterech agentów, a `.claude/skills/` dwa skille.
+   - `.claude/agents/` zawiera czterech agentów, a `.claude/skills/` trzy skille.
    - `.claude/settings.json` blokuje `Read` dla plików `.env` (`./.env`, `./**/.env` i `//**/.env`, czyli także ścieżki bezwzględne). Plik `.env.example` pozostaje czytelny.
    - `.gitignore` pomija `.claude/settings.local.json`, `CLAUDE.local.md` i `.claude/worktrees/`.
 2. **Język.** `AGENTS.md`, `CLAUDE.md`, prompty agentów i skilli są po angielsku, bo to konfiguracja agentów. ADR-y, `CONTRIBUTING.md` i `docs/AI_LOG.md` są po polsku, zgodnie z `CONTRIBUTING.md`.

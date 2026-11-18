@@ -10,7 +10,7 @@ Run from `scraper/`.
 - Lint: `python -m ruff check .`
 - Tests: `python -m pytest`
 
-Shop commands (compose up, data init, backup) arrive with the issues that add `deploy/compose.yaml`. Until then do not invent them.
+Shop commands are in `README.md`, section "Uruchomienie". Do not invent commands that are not listed there.
 
 ## Tests
 
@@ -26,8 +26,6 @@ Shop commands (compose up, data init, backup) arrive with the issues that add `d
 - `tests/` Playwright E2E tests.
 - `deploy/` `compose.yaml` and scripts for install, data init, backup and restore.
 - `docs/` the AI log in `AI_LOG.md` and architecture decisions in `docs/adr/`.
-
-`shop/`, `scraper-results/`, `tests/` and `deploy/` are still empty placeholders.
 
 ## Style and language
 
