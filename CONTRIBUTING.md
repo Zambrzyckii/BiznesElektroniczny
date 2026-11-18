@@ -41,12 +41,15 @@ Kod, nazwy plików, commity, gałęzie i tytuły PR piszemy po angielsku. Opisy 
 - Każdy z nas musi w etapie być autorem co najmniej 3 i recenzentem co najmniej 3 scalonych PR-ów. Recenzentem może być dowolna osoba z zespołu. Swoją liczbę recenzji sprawdzisz na liście PR filtrem `is:pr is:merged reviewed-by:<login>`.
 - Recenzent odpowiada w ciągu 48 godzin od prośby o recenzję.
 - Recenzja zawiera co najmniej jeden merytoryczny komentarz, np. pytanie o decyzję, wskazanie ryzyka albo opis tego, jak recenzent sprawdził zmianę. Sama akceptacja nie wystarcza.
+- Bot `claude[bot]` komentuje PR po otwarciu i po kliknięciu Ready for review. To wstępna recenzja automatyczna, która nie liczy się jako recenzja według tych zasad, więc osoba recenzująca nadal pisze co najmniej jeden merytoryczny komentarz. Czerwone sprawdzenie Claude Review nie blokuje scalania, bo zasada o pipeline zakończonym sukcesem dotyczy CI.
+- Komentarz z `@claude` w głównym polu komentarza PR-a uruchamia ponowną recenzję bota i zużywa kredyt zespołu. Bot nie wykonuje innych poleceń z takiego komentarza.
 
 ## Narzędzia AI
 
 - PR z istotnymi fragmentami wygenerowanymi przez AI dostaje etykietę `ai-assisted`, a jego opis mówi, jak sprawdzono poprawność.
 - Kto korzystał z narzędzia AI, dodaje wpis do [docs/AI_LOG.md](docs/AI_LOG.md) w tym samym PR-ze. Minimum to 2 wpisy na osobę w etapie.
 - Do narzędzi AI nie wklejamy haseł, kluczy API ani danych dostępowych.
+- Poprawki po komentarzach `claude[bot]` same w sobie nie wymagają etykiety `ai-assisted` ani wpisu w dzienniku AI. Bot jest opisany raz, w [ADR 0004](docs/adr/0004-automatic-ai-pr-review.md). Etykieta i wpis nadal obowiązują, gdy AI wygenerowało istotną część kodu.
 - Za każdą linię kodu odpowiada zespół. Na obronie trzeba umieć wyjaśnić także kod napisany z pomocą AI.
 
 ## Sekrety i duże pliki
