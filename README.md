@@ -8,10 +8,32 @@ Projekt ma charakter edukacyjny i nie jest powiązany z właścicielem sklepu do
 
 - PrestaShop 8.2.8
 - Obraz Dockera `prestashop/prestashop:8.2.8-8.1-apache` z PHP 8.1
+- MariaDB 10.11 (obraz `mariadb:10.11`)
 
 ## Uruchomienie
 
-Instrukcja krok po kroku powstanie razem z plikiem `deploy/compose.yaml` w issue [#11](https://github.com/Zambrzyckii/BiznesElektroniczny/issues/11).
+Potrzebny jest Docker z Docker Compose v2. Wszystkie komendy uruchamiamy z katalogu głównego repozytorium.
+
+1. Skopiuj plik ze zmiennymi i wpisz w nim własne hasła. Hasło administratora musi mieć od 8 do 72 znaków.
+
+   ```bash
+   cp deploy/.env.example deploy/.env
+   ```
+
+2. Uruchom sklep.
+
+   ```bash
+   docker compose -f deploy/compose.yaml up -d --wait
+   ```
+
+Pierwsze uruchomienie pobiera obrazy i instaluje sklep po polsku bez kreatora, co może potrwać kilka minut. Komenda kończy się, gdy baza i sklep są gotowe. Instalacja wgrywa też produkty demonstracyjne PrestaShop.
+
+- Sklep: http://localhost:8080
+- Panel administracyjny: `http://localhost:8080/<PS_FOLDER_ADMIN>/`, logowanie wartościami `ADMIN_MAIL` i `ADMIN_PASSWD` z `deploy/.env`
+
+Compose szuka pliku `.env` w katalogu pliku podanego w `-f`, dlatego plik leży w `deploy/`. Pozostałe komendy, np. `ps`, `logs` i `down`, też wymagają `-f deploy/compose.yaml` i pliku `deploy/.env`.
+
+Dane bazy i plików sklepu leżą w nazwanych wolumenach Dockera, a nie w katalogu repozytorium. Komenda `docker compose -f deploy/compose.yaml down` zatrzymuje sklep i zachowuje dane. Wartości z `deploy/.env` działają tylko przy pierwszej instalacji. Żeby je zmienić, zacząć od czystego sklepu albo powtórzyć przerwaną pierwszą instalację, uruchom `docker compose -f deploy/compose.yaml down -v`, a potem komendę z kroku 2. Opcja `-v` usuwa wszystkie dane sklepu.
 
 ## Struktura repozytorium
 

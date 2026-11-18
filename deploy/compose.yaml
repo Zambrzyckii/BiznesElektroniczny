@@ -1,0 +1,48 @@
+services:
+  db:
+    image: mariadb:10.11
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?copy deploy/.env.example to deploy/.env}
+      MARIADB_DATABASE: prestashop
+      MARIADB_USER: prestashop
+      MARIADB_PASSWORD: ${DB_PASSWD:?copy deploy/.env.example to deploy/.env}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  shop:
+    image: prestashop/prestashop:8.2.8-8.1-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_SERVER: db
+      DB_NAME: prestashop
+      DB_USER: prestashop
+      DB_PASSWD: ${DB_PASSWD:?copy deploy/.env.example to deploy/.env}
+      PS_INSTALL_AUTO: 1
+      PS_LANGUAGE: pl
+      PS_COUNTRY: PL
+      PS_DOMAIN: localhost:8080
+      PS_FOLDER_ADMIN: ${PS_FOLDER_ADMIN:?copy deploy/.env.example to deploy/.env}
+      ADMIN_MAIL: ${ADMIN_MAIL:?copy deploy/.env.example to deploy/.env}
+      ADMIN_PASSWD: ${ADMIN_PASSWD:?copy deploy/.env.example to deploy/.env}
+    ports:
+      - "8080:80"
+    volumes:
+      - shop-data:/var/www/html
+    healthcheck:
+      test: ["CMD-SHELL", "test ! -d /var/www/html/install && curl -fs -o /dev/null http://localhost/"]
+      start_period: 10m
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  db-data:
+  shop-data:
