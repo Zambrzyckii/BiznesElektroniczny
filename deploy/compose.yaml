@@ -36,11 +36,22 @@ services:
       - "8080:80"
     volumes:
       - shop-data:/var/www/html
+      - ./init-scripts/configure-mail.sh:/tmp/init-scripts/configure-mail.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "test ! -d /var/www/html/install && curl -fs -o /dev/null http://localhost/"]
       start_period: 10m
       interval: 10s
       timeout: 10s
+      retries: 3
+
+  mailpit:
+    image: axllent/mailpit:v1.34.0
+    ports:
+      - "8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 10s
+      timeout: 5s
       retries: 3
 
 volumes:
