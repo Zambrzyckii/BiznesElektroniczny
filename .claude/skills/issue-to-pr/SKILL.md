@@ -1,6 +1,6 @@
 ---
 name: issue-to-pr
-description: Manual route from one issue to an opened PR. Creates a worktree, then runs planner, one gate only when there are questions, implementer, verify-stack, reviewer and docs-writer, and waits for the checks of a ready PR.
+description: Manual route from one issue to an opened PR. Creates a worktree, then runs planner, one gate only when there are questions, implementer, verify-stack, reviewer and docs-writer, waits for the checks of a ready PR and writes learning notes.
 disable-model-invocation: true
 argument-hint: <issue-number> [base-branch] [lokalnie]
 ---
@@ -12,7 +12,7 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. The l
 ## Rules for the whole route
 
 - Stop for the user in exactly two cases. The first is the gate (step 4). The second is a blocked route, which is a `BLOCKED` or `NEEDS_CONTEXT` the planner cannot resolve, the fix-round cap, an issue assigned to someone else (step 1) or a stacked base that is missing on `origin` (step 2). Never ask anything else.
-- After the gate the route runs to the end. Without the local flag it pushes and opens the PR (step 9). With the local flag the route is fully local. It runs no push, no `git fetch` and no `gh` command that writes, and it gives the same final message with the branch and the worktree instead of a link. Reading with `gh issue view` and `gh api user` stays allowed.
+- After the gate the route runs to the end. Without the local flag it pushes and opens the PR (step 9). With the local flag the route is fully local. It runs no push, no `git fetch` and no `gh` command that writes, and it gives the same final message with the branch and the worktree instead of a link. Reading with `gh issue view` and `gh api user` stays allowed, and so do the read-only `gh` calls of `learning-notes`.
 - Never create or edit an issue. Reading one is allowed. The one exception is adding the runner as assignee with `gh issue edit <n> --add-assignee @me`, after a yes at the gate. The local flag skips it.
 - Give every dispatch the absolute worktree path, the branch name and the full issue text. A subagent starts in another checkout and its cwd resets between calls.
 - A worktree branched from `origin/main` can lack `AGENTS.md` until the AI layer is merged. When it does, give every dispatch to `planner`, `implementer`, `reviewer` and `docs-writer` the absolute path of `AGENTS.md` in your own checkout as required reading.
@@ -80,5 +80,13 @@ You are the controller. You run the route below for issue `$ARGUMENTS[0]`. The l
      - A stacked branch is a draft until its parent merges, as `CONTRIBUTING.md` requires. Run `gh pr create --draft --base <parent-branch>`, and the description names the parent branch.
      - The change touches `deploy/` or `shop/` and `verify-stack` returned `VERIFY: SKIPPED`. The draft carries the reason in one line. Untested Docker changes never go out as ready.
    - A PR opened as ready goes through the section "3. Wait and react" of `${CLAUDE_SKILL_DIR}/../ready-pr/SKILL.md`. Read that file and follow only that section. It waits up to about 10 minutes for CI and the review bot and fixes their valid points in one round. A draft gets no bot review, so the route does not wait for it.
-   - With the local flag, do not push. After the final message, give the PR title and description as one separate block, because it is stored nowhere else.
-   - The final message to the user has at most 5 lines. It gives the PR link, or the branch and the worktree with the local flag. It adds one sentence on what changed, what was not verified if anything, the decisions that bind teammates if any and the outcome of the wait if it ran. Nothing else.
+
+10. Write the learning notes.
+    - Run it also with the local flag. Call the `learning-notes` skill from your checkout, and name the worktree path and the base branch in every call, for example `card shop worktree <worktree-path> base <base-branch>`.
+    - Call it with `card <component>` for each component the change built or changed.
+    - Then call it with `pr <number>` and the PR number. With the local flag no PR exists, so pass the issue number.
+    - Then call `map` when this run created a new card.
+    - Each notes call's last line ends that call, not your turn. Continue with the next call or the final message.
+    - A refusal or failure here does not stop the route. When a call ends with `REFUSED:` or fails, skip the remaining notes calls and go on to the final message. It is never a question to the user.
+    - With the local flag, do not push. After the final message, give the PR title and description as one separate block, because it is stored nowhere else.
+    - The final message to the user has at most 5 lines. It gives the PR link, or the branch and the worktree with the local flag. It adds one sentence on what changed, what was not verified if anything, the decisions that bind teammates if any and the outcome of the wait if it ran, and one clause on the notes. Nothing else.
