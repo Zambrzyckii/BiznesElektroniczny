@@ -110,7 +110,7 @@ sh deploy/restore-settings.sh
 
 Robisz to po pierwszej instalacji, po `down -v` i po awarii. Skrypt nadpisuje wszystkie ustawienia z list, a ich bieżące wartości giną. Trwa kilka minut, bo każdy klucz ustawia osobne wywołanie `bin/console`. Skrypt włącza motyw, instaluje i włącza albo wyłącza moduły, wgrywa migawkę i logo przewoźników, ustawia klucze, wgrywa pozycje w hakach i ograniczenia płatności, a na końcu czyści cache. Nigdy nie odinstalowuje modułów. Żeby wyłączyć moduł, wyłącz go w sklepie i wyeksportuj ponownie.
 
-Po odtworzeniu sprawdź wynik. Uruchom eksport jeszcze raz, a potem `git diff --exit-code deploy/settings`. Brak różnic oznacza, że sklep ma ustawienia z repozytorium.
+Po odtworzeniu sprawdź wynik. Uruchom eksport jeszcze raz, a potem `git status --porcelain deploy/settings`. Puste wyjście oznacza, że sklep ma ustawienia z repozytorium. Samo `git diff` pomija pliki nieśledzone, więc nie wykryłoby logo przewoźnika, którego brakuje w repozytorium.
 
 ### Wymagania
 

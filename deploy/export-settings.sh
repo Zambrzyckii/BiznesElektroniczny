@@ -16,12 +16,20 @@ SQL
 }
 
 tables=$(cat settings/tables.txt)
+if [ -z "$tables" ]; then
+  echo "settings/tables.txt is empty, the export would dump the whole database." >&2
+  exit 1
+fi
 
 keys=""
 for key in $(cat settings/config-keys.txt); do
   keys="$keys,'$key'"
 done
 keys=${keys#,}
+if [ -z "$keys" ]; then
+  echo "settings/config-keys.txt is empty." >&2
+  exit 1
+fi
 
 scoped=$(echo "SELECT name FROM ps_configuration WHERE (id_shop IS NOT NULL OR id_shop_group IS NOT NULL) AND name IN ($keys);" | db_query)
 if [ -n "$scoped" ]; then
@@ -37,9 +45,10 @@ fi
   docker compose exec -T db sh -c 'mariadb-dump --default-character-set=utf8mb4 -u"$MARIADB_USER" -p"$MARIADB_PASSWORD" --single-transaction --no-create-info --skip-extended-insert --order-by-primary --skip-dump-date --skip-comments "$MARIADB_DATABASE" "$@"' sh $tables
 } > settings/snapshot.sql
 
+logos=$(docker compose exec -T shop sh -c 'cd /var/www/html/img/s && ls *.jpg 2>/dev/null || true')
 mkdir -p settings/carrier-logos
 rm -f settings/carrier-logos/*.jpg
-for file in $(docker compose exec -T shop sh -c 'cd /var/www/html/img/s && ls *.jpg 2>/dev/null || true'); do
+for file in $logos; do
   docker compose cp "shop:/var/www/html/img/s/$file" "settings/carrier-logos/$file"
 done
 
