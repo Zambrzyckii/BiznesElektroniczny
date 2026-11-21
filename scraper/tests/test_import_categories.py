@@ -45,7 +45,30 @@ BLANK_SCHEMA_XML = b"""<?xml version="1.0" encoding="UTF-8"?>
 </prestashop>
 """
 
-CATEGORIES_JSON_PATH = Path(__file__).resolve().parents[2] / "scraper-results" / "categories.json"
+SAMPLE_CATEGORIES: list[dict[str, Any]] = [
+    {
+        "name": "Batony",
+        "subcategories": [
+            {"name": "Daktyle w posypce", "products": 4},
+            {"name": "Pozostałe batony", "products": 2},
+        ],
+    },
+    {
+        "name": "Zdrowe śniadanie",
+        "subcategories": [
+            {"name": "Produkty śniadaniowe", "products": 7},
+            {"name": "Przekąski śniadaniowe", "products": 4},
+            {"name": "Kremy orzechowe", "products": 3},
+        ],
+    },
+    {
+        "name": "Zamienniki mięsa",
+        "subcategories": [
+            {"name": "Kiełbaski, parówki i kaszanki", "products": 4},
+            {"name": "Pozostałe zamienniki mięsa", "products": 3},
+        ],
+    },
+]
 
 
 class FakeResponse:
@@ -254,20 +277,23 @@ def test_build_category_xml_for_post_and_put() -> None:
     assert put_cat.find("associations") is None
 
 
-def test_end_to_end_create_and_idempotent_rerun(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_end_to_end_create_and_idempotent_rerun(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    categories_file = tmp_path / "categories.json"
+    categories_file.write_text(json.dumps(SAMPLE_CATEGORIES, ensure_ascii=False), encoding="utf-8")
+
     ws_key = "A" * 32
     session = FakeShopSession()
 
     monkeypatch.setenv("PS_WS_KEY", ws_key)
     monkeypatch.setattr(import_categories.requests, "Session", lambda: session)
 
-    exit_code = main(["--categories", str(CATEGORIES_JSON_PATH), "--shop-url", "http://localhost:8080/"])
+    exit_code = main(["--categories", str(categories_file), "--shop-url", "http://localhost:8080/"])
     assert exit_code == 0
     assert session.auth == (ws_key, "")
 
     posts = [c for c in session.calls if c["method"] == "POST"]
     puts = [c for c in session.calls if c["method"] == "PUT"]
-    assert len(posts) == 39
+    assert len(posts) == 10
     assert len(puts) == 0
 
     for call in session.calls:
@@ -276,18 +302,18 @@ def test_end_to_end_create_and_idempotent_rerun(monkeypatch: pytest.MonkeyPatch)
             assert call["headers"].get("Content-Type") == "application/xml"
 
     session.calls.clear()
-    exit_code_rerun = main(["--categories", str(CATEGORIES_JSON_PATH), "--shop-url", "http://localhost:8080"])
+    exit_code_rerun = main(["--categories", str(categories_file), "--shop-url", "http://localhost:8080"])
     assert exit_code_rerun == 0
 
     posts_rerun = [c for c in session.calls if c["method"] == "POST"]
     puts_rerun = [c for c in session.calls if c["method"] == "PUT"]
     assert len(posts_rerun) == 0
-    assert len(puts_rerun) == 39
+    assert len(puts_rerun) == 10
 
 
 def test_mixed_create_and_update() -> None:
-    categories = json.loads(CATEGORIES_JSON_PATH.read_text(encoding="utf-8"))[:2]
-    # Batony (7 subcats) + Mini batoniki (6 subcats) = 2 parents + 13 subcats = 15 total
+    categories = SAMPLE_CATEGORIES[:2]
+    # Batony (2 subcats) + Zdrowe śniadanie (3 subcats) = 2 parents + 5 subcats = 7 total
     session = FakeShopSession(
         initial_categories=[
             {"id": "1", "id_parent": "0", "is_root_category": "0", "name": "Root"},
@@ -300,14 +326,16 @@ def test_mixed_create_and_update() -> None:
 
     result = import_categories.import_categories(session, "http://localhost:8080", categories)
 
-    assert result == {"created": 13, "updated": 2}
+    assert result == {"created": 5, "updated": 2}
     posts = [c for c in session.calls if c["method"] == "POST"]
     puts = [c for c in session.calls if c["method"] == "PUT"]
-    assert len(posts) == 13
+    assert len(posts) == 5
     assert len(puts) == 2
 
 
-def test_missing_ws_key_returns_one_without_http_calls(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_missing_ws_key_returns_one_without_http_calls(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    categories_file = tmp_path / "categories.json"
+    categories_file.write_text(json.dumps(SAMPLE_CATEGORIES, ensure_ascii=False), encoding="utf-8")
     called = False
 
     def fail_session() -> Any:
@@ -318,9 +346,9 @@ def test_missing_ws_key_returns_one_without_http_calls(monkeypatch: pytest.Monke
     monkeypatch.delenv("PS_WS_KEY", raising=False)
     monkeypatch.setattr(import_categories.requests, "Session", fail_session)
 
-    assert main(["--categories", str(CATEGORIES_JSON_PATH)]) == 1
+    assert main(["--categories", str(categories_file)]) == 1
     assert not called
 
     monkeypatch.setenv("PS_WS_KEY", "   ")
-    assert main(["--categories", str(CATEGORIES_JSON_PATH)]) == 1
+    assert main(["--categories", str(categories_file)]) == 1
     assert not called
