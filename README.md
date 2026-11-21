@@ -37,6 +37,8 @@ Dane bazy i plików sklepu leżą w nazwanych wolumenach Dockera, a nie w katalo
 
 Motyw potomny trzymamy w `shop/themes/`, a moduły własne w `shop/modules/`. Komenda z kroku 2 za każdym razem przebudowuje obraz sklepu, a przy każdym starcie kontenera skrypt `shop/init-scripts/10-copy-shop-files.sh` kopiuje te katalogi do wolumenu `shop-data` i nadpisuje ich poprzednią wersję. Po zmianie motywu wystarczy więc ponownie uruchomić komendę z kroku 2. Plik usunięty z repozytorium zostaje w wolumenie aż do `down -v`, a zmiany tych plików zrobione w panelu znikają przy następnym starcie.
 
+Motyw potomny `dobrakaloria` dziedziczy po motywie Classic, którego plików nie zmieniamy. Przy każdym starcie kontenera skrypt `shop/init-scripts/20-enable-theme.sh` sprawdza w bazie aktywny motyw i włącza `dobrakaloria` tylko wtedy, gdy aktywny jest inny. Po pierwszym uruchomieniu z czystego klona sklep działa więc już na motywie potomnym. Tekst i link baneru na stronie głównej oraz nazwę jego obrazu zmieniamy w jednym pliku `shop/themes/dobrakaloria/templates/index.tpl`, a sam obraz leży w `shop/themes/dobrakaloria/assets/img/`. Po zmianie wystarczy ponownie uruchomić komendę z kroku 2. Link baneru ma stały identyfikator `homepage-banner`, po którym w etapie 2 mierzymy kliknięcia w GA4, dlatego go nie zmieniamy. Zmiana `shop/themes/dobrakaloria/config/theme.yml` nie trafia do działającego sklepu, bo PrestaShop czyta kopię tego pliku zapisaną w wolumenie. Działa dopiero po `down -v`.
+
 ## Struktura repozytorium
 
 | Katalog | Zawartość |
