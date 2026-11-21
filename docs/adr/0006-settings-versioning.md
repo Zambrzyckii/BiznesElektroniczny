@@ -154,7 +154,7 @@ Każde źródło sprawdzono na tagu 8.2.8, chyba że zaznaczono "gałąź 8.2.x"
 - https://raw.githubusercontent.com/PrestaShop/ps_linklist/v6.0.7/src/Repository/LinkBlockRepository.php
 - https://raw.githubusercontent.com/PrestaShop/ps_cashondelivery/v2.0.1/ps_cashondelivery.php
 - https://raw.githubusercontent.com/PrestaShop/ps_wirepayment/v2.2.0/ps_wirepayment.php
-- https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/composer.lock (wersja `ps_wirepayment`)
+- https://raw.githubusercontent.com/PrestaShop/PrestaShop/8.2.8/composer.lock (wersje `ps_wirepayment`, `ps_checkpayment` i `ps_cashondelivery`)
 - https://raw.githubusercontent.com/PrestaShop/ps_mainmenu/master/ps_mainmenu.php
 - https://raw.githubusercontent.com/PrestaShop/ps_searchbar/master/ps_searchbar.php
 - https://raw.githubusercontent.com/PrestaShop/ps_emailsubscription/master/ps_emailsubscription.php
