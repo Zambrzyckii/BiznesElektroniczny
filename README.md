@@ -27,6 +27,8 @@ Potrzebny jest Docker z Docker Compose v2. Wszystkie komendy uruchamiamy z katal
    docker compose -f deploy/compose.yaml up -d --wait
    ```
 
+   Po świeżej instalacji sklep ma ustawienia z repozytorium dopiero po `sh deploy/restore-settings.sh`, opisanym w podrozdziale "Jak odtworzyć ustawienia" sekcji "Ustawienia sklepu".
+
 Pierwsze uruchomienie pobiera obrazy i instaluje sklep po polsku bez kreatora, co może potrwać kilka minut. Komenda kończy się, gdy baza i sklep są gotowe. Instalacja wgrywa też produkty demonstracyjne PrestaShop.
 
 - Sklep: http://localhost:8080
@@ -72,7 +74,7 @@ Ustawienia z "Listy ustawień" w `docs/adr/0006-settings-versioning.md` leżą w
 | `payment-restrictions.sql` | Ograniczenia płatności według przewoźników, krajów i walut, zapisane przez nazwę modułu |
 | `carrier-logos/` | Pliki logo przewoźników, które odpowiadają identyfikatorom z migawki |
 
-Nowa tabela albo nowy klucz trafia do `tables.txt` lub `config-keys.txt` w tym samym PR, po sprawdzeniu, że nie zawiera danych osobowych ani sekretu. Eksport nie zawiera danych klientów, haseł, kluczy API ani wartości z `deploy/.env`, bo zapisuje tylko pozycje z tych dwóch list.
+Nowa tabela albo nowy klucz trafia do `tables.txt` lub `config-keys.txt` w tym samym PR, po sprawdzeniu, że nie zawiera danych osobowych ani sekretu. Eksport zapisuje tylko pozycje z "Listy ustawień" w ADR 0006, więc nie zawiera danych klientów, haseł, kluczy API ani wartości z `deploy/.env`.
 
 ### Kiedy eksportować
 
@@ -80,7 +82,7 @@ Po każdej zmianie ustawienia z listy. Konfigurujesz sklep na stosie odbudowanym
 
 ### Jak eksportować
 
-1. Uruchom stos i zmień ustawienia w panelu.
+1. Uruchom stos z aktualnego `main`, wykonaj `sh deploy/restore-settings.sh`, a dopiero potem zmień ustawienia w panelu.
 2. Z katalogu głównego repozytorium uruchom eksport.
 
    ```bash
