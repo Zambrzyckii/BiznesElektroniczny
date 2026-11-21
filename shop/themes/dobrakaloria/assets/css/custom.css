@@ -1,0 +1,16 @@
+.homepage-banner {
+  position: relative;
+  display: block;
+  margin-bottom: 1.5rem;
+}
+
+.homepage-banner-text {
+  position: absolute;
+  left: 1.5rem;
+  bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #232323;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
