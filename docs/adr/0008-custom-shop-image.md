@@ -12,7 +12,7 @@ Wymaganie W3 [K] mówi, że sklep działa w kontenerach Docker. W etapie 2 ten s
 - Skrypty z `/tmp/init-scripts/` skrypt startowy uruchamia przy każdym starcie, jako root, pod `set -e`, tuż przed serwerem WWW. Przy świeżej instalacji kolejność to instalator, `post-install-scripts`, a potem `init-scripts`.
 - `/var/www/html` jest nazwanym wolumenem `shop-data` (ADR 0003). Docker wypełnia go zawartością obrazu tylko przy pierwszym utworzeniu, więc pliki z nowego obrazu nie podmienią się w istniejącym wolumenie.
 - Tag `8.2.8-8.1-apache` jest wieloarchitekturowy (amd64, arm64, arm/v7). Bez przypięcia platformy Mac z Apple Silicon zbuduje obraz arm64.
-- Poza zakresem tej decyzji jest sam motyw potomny (#37).
+- Poza zakresem tej decyzji jest wygląd motywu potomnego (#37). Sposób jego aktywacji opisuje sekcja „Aktywacja motywu potomnego”.
 
 ## Rozważane opcje
 
@@ -44,7 +44,7 @@ Wymaganie W3 [K] mówi, że sklep działa w kontenerach Docker. W etapie 2 ten s
 | Opcja | Zalety | Wady |
 |---|---|---|
 | **Skrypt `20-enable-theme.sh` w `shop/init-scripts/`, który wywołuje `prestashop:theme:enable` tylko, gdy `ps_shop.theme_name` wskazuje inny motyw (wybrana)** | Skrypt jest w obrazie, więc działa też w etapie 2. Motyw włącza PrestaShop, tak jak zakłada ADR 0006 z PR-a #56. Kolejny start nie zmienia ustawień. | Skrypt czyta bazę klientem `mysql` z obrazu. |
-| Ten sam skrypt bez sprawdzenia | Krótszy skrypt. | `ThemeManager::enable` nie sprawdza, czy motyw jest już aktywny. Przy każdym starcie układa moduły w hakach według `theme.yml` i włącza moduły wyłączone w panelu. |
+| Ten sam skrypt bez sprawdzenia | Krótszy skrypt. | `ThemeManager::enable` nie sprawdza, czy motyw jest już aktywny. Przy każdym starcie układa moduły w hakach według `theme.yml` i włącza moduły wyłączone w panelu (źródło: [`ThemeManager.php`](https://github.com/PrestaShop/PrestaShop/blob/8.2.8/src/Core/Addon/Theme/ThemeManager.php) i [`HookConfigurator.php`](https://github.com/PrestaShop/PrestaShop/blob/8.2.8/src/Core/Module/HookConfigurator.php) w tagu 8.2.8). |
 | `UPDATE` kolumny `ps_shop.theme_name` w SQL | Bez `bin/console`. | Pomija kroki włączania motywu (moduły, haki, typy obrazów) i omija wybór z ADR 0006. |
 | Skrypt w `deploy/init-scripts/` montowany w compose | Ta sama konwencja co skrypty z kluczami z #14 i #31. | Motyw jest w obrazie, a skrypt nie. Wymaga zmiany compose, a klaster w etapie 2 nie ma repozytorium. |
 
@@ -63,7 +63,7 @@ Wybieramy własny obraz sklepu zbudowany z `shop/Dockerfile`. Dodajemy pliki z t
 Przyjmujemy następujące zasady.
 
 - Pliki czekają w obrazie w `/tmp/shop-files/`, a skrypt kopiuje je stamtąd do wolumenu `shop-data`.
-- Skrypty w `shop/init-scripts/` mają numeryczny prefiks. `10-` i `20-` są zajęte, a kolejne skrypty dostają wyższe numery i uruchamiają się po nim.
+- Skrypty w `shop/init-scripts/` mają numeryczny prefiks. `10-` i `20-` są zajęte, a kolejne skrypty dostają wyższe numery i uruchamiają się po nich.
 - Kopiowanie robimy bez `-p`, więc każdy kopiowany plik dostaje nowy czas modyfikacji przy każdym starcie. Po każdym restarcie Smarty kompiluje od nowa wszystkie szablony motywu.
 - Katalog motywu nie może nazywać się `classic`, bo skrypt nadpisałby domyślny motyw PrestaShop.
 - Usługa `shop` w `deploy/compose.yaml` ma `build: ../shop`, `platform: linux/amd64` i `pull_policy: build`, a nie ma klucza `image`.
