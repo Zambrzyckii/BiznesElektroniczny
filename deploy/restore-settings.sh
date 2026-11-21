@@ -46,6 +46,7 @@ while IFS= read -r line; do
 done < settings/modules.tsv
 
 db_query < settings/snapshot.sql
+docker compose exec -T shop sh -c 'rm -f /var/www/html/img/s/*.jpg'
 for file in settings/carrier-logos/*.jpg; do
   [ -e "$file" ] || continue
   docker compose cp "$file" shop:/var/www/html/img/s/

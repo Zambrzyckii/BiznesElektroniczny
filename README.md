@@ -82,7 +82,15 @@ Po każdej zmianie ustawienia z listy. Konfigurujesz sklep na stosie odbudowanym
 
 ### Jak eksportować
 
-1. Uruchom stos z aktualnego `main`, wykonaj `sh deploy/restore-settings.sh`, a dopiero potem zmień ustawienia w panelu.
+1. Zacznij od świeżego stosu z aktualnego `main`. Usuń stos razem z wolumenami, uruchom go ponownie jak w kroku 2 sekcji "Uruchomienie" i odtwórz ustawienia. Opcja `-v` usuwa wszystkie dane sklepu w tym stosie.
+
+   ```bash
+   docker compose -f deploy/compose.yaml down -v
+   docker compose -f deploy/compose.yaml up -d --wait
+   sh deploy/restore-settings.sh
+   ```
+
+   Dopiero potem zmień ustawienia w panelu.
 2. Z katalogu głównego repozytorium uruchom eksport.
 
    ```bash
@@ -108,7 +116,7 @@ Na działającym stosie uruchom odtwarzanie.
 sh deploy/restore-settings.sh
 ```
 
-Robisz to po pierwszej instalacji, po `down -v` i po awarii. Skrypt nadpisuje wszystkie ustawienia z list, a ich bieżące wartości giną. Trwa kilka minut, bo każdy klucz ustawia osobne wywołanie `bin/console`. Skrypt włącza motyw, instaluje i włącza albo wyłącza moduły, wgrywa migawkę i logo przewoźników, ustawia klucze, wgrywa pozycje w hakach i ograniczenia płatności, a na końcu czyści cache. Nigdy nie odinstalowuje modułów. Żeby wyłączyć moduł, wyłącz go w sklepie i wyeksportuj ponownie.
+Robisz to po pierwszej instalacji, po `down -v` i po awarii. Skrypt nadpisuje wszystkie ustawienia z list, a ich bieżące wartości giną. Trwa kilka minut, bo każdy klucz ustawia osobne wywołanie `bin/console`. Skrypt włącza motyw, instaluje i włącza albo wyłącza moduły, wgrywa migawkę, zastępuje wszystkie logo przewoźników w sklepie plikami z repozytorium, ustawia klucze, wgrywa pozycje w hakach i ograniczenia płatności, a na końcu czyści cache. Nigdy nie odinstalowuje modułów. Żeby wyłączyć moduł, wyłącz go w sklepie i wyeksportuj ponownie.
 
 Po odtworzeniu sprawdź wynik. Uruchom eksport jeszcze raz, a potem `git status --porcelain deploy/settings`. Puste wyjście oznacza, że sklep ma ustawienia z repozytorium. Samo `git diff` pomija pliki nieśledzone, więc nie wykryłoby logo przewoźnika, którego brakuje w repozytorium.
 
