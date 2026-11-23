@@ -36,7 +36,7 @@ services:
       - "8080:80"
     volumes:
       - shop-data:/var/www/html
-      - ./init-scripts/configure-mail.sh:/tmp/init-scripts/configure-mail.sh:ro
+      - ./init-scripts/configure-mail.sh:/tmp/init-scripts/configure-mail.sh:ro,z
     healthcheck:
       test: ["CMD-SHELL", "test ! -d /var/www/html/install && curl -fs -o /dev/null http://localhost/"]
       start_period: 10m
