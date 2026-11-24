@@ -30,8 +30,7 @@ danych ma działać z czystego klona (≤ 15 min), także na klastrze w etapie 2
 
 ## Konsekwencje
 
-- Skrypt inicjalizacji danych (`make init`) najpierw pobiera `images.zip` z Releases,
-  a gdy się nie uda, pobiera zdjęcia ponownie z adresów w `products.json`
-  (przez `scraper/images.py`, z tym samym tempem i robots.txt).
+- Skrypt inicjalizacji danych (#17) może pobrać `images.zip` z Releases; zdjęcia da się też
+  odtworzyć z adresów w `products.json` przez `scraper/images.py`. Sposób wybiera #17.
 - Po każdym ponownym scrapowaniu trzeba wrzucić nowy `images.zip` do Releases.
 - Obraz kontenera nie zawiera zdjęć, więc jest mały i bezstanowy (ważne dla Swarma w etapie 2).
