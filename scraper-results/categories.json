@@ -1,0 +1,165 @@
+[
+  {
+    "name": "Batony",
+    "subcategories": [
+      {
+        "name": "Daktyle w posypce",
+        "products": 4
+      },
+      {
+        "name": "Batony klasyczne",
+        "products": 2
+      },
+      {
+        "name": "Batony z dodatkiem kokosa",
+        "products": 2
+      },
+      {
+        "name": "Batony z dodatkiem czekolady",
+        "products": 2
+      },
+      {
+        "name": "Batony proteinowe",
+        "products": 6
+      },
+      {
+        "name": "Batony z nerkowców",
+        "products": 6
+      },
+      {
+        "name": "Pozostałe batony",
+        "products": 2
+      }
+    ]
+  },
+  {
+    "name": "Mini batoniki",
+    "subcategories": [
+      {
+        "name": "O smaku ciast",
+        "products": 14
+      },
+      {
+        "name": "O smaku deserów",
+        "products": 4
+      },
+      {
+        "name": "O smaku kultowych batonów",
+        "products": 3
+      },
+      {
+        "name": "Klasyczne smaki",
+        "products": 2
+      },
+      {
+        "name": "Do zadań specjalnych",
+        "products": 4
+      },
+      {
+        "name": "Proteinowe z niskim IG",
+        "products": 3
+      }
+    ]
+  },
+  {
+    "name": "Kulki",
+    "subcategories": [
+      {
+        "name": "Kulki RAW z kakao",
+        "products": 7
+      },
+      {
+        "name": "Kulki zbożowe",
+        "products": 4
+      },
+      {
+        "name": "Kulki w pudrze owocowym",
+        "products": 2
+      },
+      {
+        "name": "Pozostałe kulki",
+        "products": 1
+      }
+    ]
+  },
+  {
+    "name": "Zdrowe śniadanie",
+    "subcategories": [
+      {
+        "name": "Produkty śniadaniowe",
+        "products": 7
+      },
+      {
+        "name": "Przekąski śniadaniowe",
+        "products": 4
+      },
+      {
+        "name": "Kremy orzechowe",
+        "products": 3
+      }
+    ]
+  },
+  {
+    "name": "Zamienniki mięsa",
+    "subcategories": [
+      {
+        "name": "Szybkie obiady",
+        "products": 9
+      },
+      {
+        "name": "Pasztety",
+        "products": 1
+      },
+      {
+        "name": "Burgery",
+        "products": 6
+      },
+      {
+        "name": "Kiełbaski, parówki i kaszanki",
+        "products": 4
+      },
+      {
+        "name": "Zdrowy grill",
+        "products": 1
+      },
+      {
+        "name": "Pozostałe zamienniki mięsa",
+        "products": 3
+      }
+    ]
+  },
+  {
+    "name": "Zestawy słodyczy",
+    "subcategories": [
+      {
+        "name": "W zestawie taniej",
+        "products": 21
+      },
+      {
+        "name": "Na prezent",
+        "products": 7
+      },
+      {
+        "name": "Pozostałe zestawy słodyczy",
+        "products": 2
+      }
+    ]
+  },
+  {
+    "name": "Zestawy niemięs",
+    "subcategories": [
+      {
+        "name": "Duży",
+        "products": 1
+      },
+      {
+        "name": "Średni",
+        "products": 3
+      },
+      {
+        "name": "Pozostałe zestawy niemięs",
+        "products": 1
+      }
+    ]
+  }
+]
