@@ -37,7 +37,7 @@ services:
     volumes:
       - shop-data:/var/www/html
       - ./init-scripts/configure-mail.sh:/tmp/init-scripts/configure-mail.sh:ro,z
-      - ./init-scripts/configure-locale.sh:/tmp/init-scripts/configure-locale.sh:ro
+      - ./init-scripts/configure-locale.sh:/tmp/init-scripts/configure-locale.sh:ro,z
     healthcheck:
       test: ["CMD-SHELL", "test ! -d /var/www/html/install && curl -fs -o /dev/null http://localhost/"]
       start_period: 10m

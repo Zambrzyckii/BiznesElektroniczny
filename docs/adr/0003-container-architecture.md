@@ -52,7 +52,7 @@ Wybieramy dwie usługi opisane w `deploy/compose.yaml`.
 | Usługa | Obraz | Wolumen | Port na hoście | Healthcheck |
 |---|---|---|---|---|
 | `db` | `mariadb:10.11` | `db-data:/var/lib/mysql` | brak | `healthcheck.sh --connect --innodb_initialized` |
-| `shop` | `prestashop/prestashop:8.2.8-8.1-apache` | `shop-data:/var/www/html` oraz `./init-scripts/configure-locale.sh:/tmp/init-scripts/configure-locale.sh:ro` | `8080:80` | brak katalogu `install` i odpowiedź serwera WWW |
+| `shop` | `prestashop/prestashop:8.2.8-8.1-apache` | `shop-data:/var/www/html` oraz `./init-scripts/configure-locale.sh:/tmp/init-scripts/configure-locale.sh:ro,z` | `8080:80` | brak katalogu `install` i odpowiedź serwera WWW |
 
 Przyjmujemy następujące zasady.
 
