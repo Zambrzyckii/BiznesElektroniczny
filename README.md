@@ -72,6 +72,31 @@ Skrypt `scraper/import_categories.py` używa `PS_WS_KEY` i opcjonalnie `PS_SHOP_
 | `deploy/` | `compose.yaml` oraz skrypty instalacji, inicjalizacji danych, backupu i odtwarzania |
 | `docs/` | Dziennik AI w `AI_LOG.md` i decyzje architektoniczne w `docs/adr/` |
 
+## Testy E2E
+
+Testy E2E piszemy w Playwright 1.65.1 w TypeScript. Projekt leży w `tests/` i ma własny `package.json`, a komendy z tej sekcji uruchamiamy z katalogu `tests/`. Potrzebny jest Node.js 20 lub nowszy i działający sklep z sekcji „Uruchomienie”.
+
+1. Jednorazowo zainstaluj zależności i przeglądarkę Chromium.
+
+   ```bash
+   npm ci
+   npx playwright install chromium
+   ```
+
+   Na Linuksie brakujące biblioteki systemowe instaluje `npx playwright install --with-deps chromium`.
+
+2. Uruchom testy.
+
+   ```bash
+   npx playwright test
+   ```
+
+Testy działają w Chromium w trybie headless i akceptują certyfikat self-signed z proxy. Adres sklepu pochodzi ze zmiennej `BASE_URL`, a bez niej testy używają `https://localhost`. Inny sklep, np. na klastrze w etapie 2, testujesz komendą `BASE_URL=https://adres-sklepu npx playwright test`. W PowerShell zmienną ustawia `$env:BASE_URL="https://adres-sklepu"` przed komendą z kroku 2.
+
+Każde uruchomienie tworzy raport HTML w `tests/playwright-report/` i raport JUnit XML w `tests/test-results/junit.xml`. Nieudany test zostawia w raporcie HTML zrzut ekranu. Raport otwiera komenda `npx playwright show-report`.
+
+Scenariusz z W4 to jeden test w `tests/scenario.spec.ts`. Każdy krok scenariusza to osobne `test.step()`, więc raport pokazuje kroki w kolejności. Kolejne kroki dopisujemy na końcu tego testu.
+
 ## Zespół
 
 | Imię i nazwisko | GitHub |
