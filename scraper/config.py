@@ -1,9 +1,9 @@
-"""Konfiguracja scrapera: adres sklepu i drzewo kategorii (ADR „Kategorie, VAT i atrybuty”).
+"""Konfiguracja scrapera: adres sklepu i drzewo kategorii (docs/adr/0009-categories-vat-attributes.md).
 
 Kategorie to nagłówki kolumn menu sklepu źródłowego, podkategorie to linki pod nimi.
 "Pozostałe ..." wskazują stronę całej kategorii; jako największe dostają tylko produkty
-spoza mniejszych podkategorii. Nowości, Bestsellery, Promocje i Polecane są pominięte,
-bo to filtry na produktach z innych kategorii.
+spoza mniejszych podkategorii. Nowości, Bestsellery, Promocje, Polecane i "Promocje z krótką
+datą" (pod Zamiennikami mięsa) są pominięte, bo to tymczasowe filtry na produktach z innych kategorii.
 """
 
 BASE_URL = "https://dobrakaloria.pl"
@@ -23,6 +23,12 @@ MANUAL_CATEGORIES = {
     134: ["Zestawy słodyczy", "Pozostałe zestawy słodyczy"],  # Zestaw jabłko & cynamon 20szt
 }
 
+# Produkty spoza asortymentu spożywczego, które sklep sprzedaje bez kategorii w menu; pomijamy je świadomie.
+EXCLUDED_PRODUCTS = {
+    334: "Torba duża",
+    335: "Torba mała",
+}
+
 CATEGORY_TREE = {
     "Batony": {
         "Daktyle w posypce": "https://dobrakaloria.pl/106-daktyle-w-posypce",
@@ -32,6 +38,7 @@ CATEGORY_TREE = {
         "Batony z orzechami": "https://dobrakaloria.pl/37-batony-z-orzechami",
         "Batony z dodatkiem czekolady": "https://dobrakaloria.pl/42-batony-z-dodatkiem-czekolady",
         "Batony proteinowe": "https://dobrakaloria.pl/46-batony-proteinowe",
+        # adres jak w menu sklepu: link "Batony z nerkowców" prowadzi do /40-batony-o-smaku-ciast
         "Batony z nerkowców": "https://dobrakaloria.pl/40-batony-o-smaku-ciast",
         "Pozostałe batony": "https://dobrakaloria.pl/102-wszystkie-batony",
     },
@@ -63,7 +70,6 @@ CATEGORY_TREE = {
         "Burgery": "https://dobrakaloria.pl/96-burgery",
         "Kiełbaski, parówki i kaszanki": "https://dobrakaloria.pl/69-kielbaski-i-kaszanki",
         "Zdrowy grill": "https://dobrakaloria.pl/57-zdrowy-grill",
-        "Promocje z krótką datą": "https://dobrakaloria.pl/97-promocje-z-krotka-data",
         "Pozostałe zamienniki mięsa": "https://dobrakaloria.pl/56-zamienniki-miesa",
     },
     "Zestawy słodyczy": {

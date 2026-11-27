@@ -52,12 +52,12 @@ Wybieramy dwie usługi opisane w `deploy/compose.yaml`.
 | Usługa | Obraz | Wolumen | Port na hoście | Healthcheck |
 |---|---|---|---|---|
 | `db` | `mariadb:10.11` | `db-data:/var/lib/mysql` | brak | `healthcheck.sh --connect --innodb_initialized` |
-| `shop` | własny z `shop/Dockerfile` (ADR 0008) | `shop-data:/var/www/html` | `8080:80` | brak katalogu `install` i odpowiedź serwera WWW |
+| `shop` | własny z `shop/Dockerfile` (ADR 0008) | `shop-data:/var/www/html` oraz `./init-scripts/configure-locale.sh:/tmp/init-scripts/configure-locale.sh:ro,z` | `8080:80` | brak katalogu `install` i odpowiedź serwera WWW |
 
 Przyjmujemy następujące zasady.
 
 - Sklep startuje dopiero, gdy `db` jest zdrowa, przez `depends_on` z `condition: service_healthy`.
-- Instalacja przebiega automatycznie po polsku dzięki `PS_INSTALL_AUTO=1`, `PS_LANGUAGE=pl` i `PS_COUNTRY=PL`.
+- Instalacja przebiega automatycznie po polsku dzięki `PS_INSTALL_AUTO=1`, `PS_LANGUAGE=pl` i `PS_COUNTRY=pl`. Kod kraju jest pisany małymi literami, bo instalator szuka paczki `localization/<kod>.xml` z rozróżnieniem wielkości liter (`LocalizationWarmer::warmUp`). Przy `PL` nie znajduje `pl.xml` i wgrywa `default.xml` z walutami EUR i USD, językiem angielskim i bez podatków. Domyślny kraj nie zależy od wielkości liter, bo `Country::getByIso` zamienia kod na wielkie litery.
 - Hasła i dane administratora są tylko w `deploy/.env`, a repozytorium zawiera `deploy/.env.example`. Plik leży obok `compose.yaml`, bo Compose czyta `.env` z katalogu pliku podanego w `-f`.
 - Plik nie ma kluczy `version`, `name` ani `container_name`. Projekt nazywa się `deploy`, a osobny projekt można uruchomić z `COMPOSE_PROJECT_NAME`.
 - Baza nie publikuje portu na hoście.
