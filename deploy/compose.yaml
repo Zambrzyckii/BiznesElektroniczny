@@ -27,7 +27,7 @@ services:
       DB_PASSWD: ${DB_PASSWD:?copy deploy/.env.example to deploy/.env}
       PS_INSTALL_AUTO: 1
       PS_LANGUAGE: pl
-      PS_COUNTRY: PL
+      PS_COUNTRY: pl
       PS_DOMAIN: localhost
       PS_ENABLE_SSL: 1
       PS_FOLDER_ADMIN: ${PS_FOLDER_ADMIN:?copy deploy/.env.example to deploy/.env}
@@ -35,6 +35,8 @@ services:
       ADMIN_PASSWD: ${ADMIN_PASSWD:?copy deploy/.env.example to deploy/.env}
     volumes:
       - shop-data:/var/www/html
+      - ./init-scripts/configure-mail.sh:/tmp/init-scripts/configure-mail.sh:ro,z
+      - ./init-scripts/configure-locale.sh:/tmp/init-scripts/configure-locale.sh:ro,z
       - ./shop-https.conf:/etc/apache2/conf-enabled/shop-https.conf:ro
     healthcheck:
       test: ["CMD-SHELL", "test ! -d /var/www/html/install && curl -fs -o /dev/null http://localhost/"]
@@ -65,6 +67,16 @@ services:
     volumes:
       - ./proxy.conf:/etc/nginx/conf.d/default.conf:ro
       - proxy-certs:/etc/nginx/certs
+
+  mailpit:
+    image: axllent/mailpit:v1.34.0
+    ports:
+      - "8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 volumes:
   db-data:
