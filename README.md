@@ -10,10 +10,11 @@ Projekt ma charakter edukacyjny i nie jest powiązany z właścicielem sklepu do
 - Obraz Dockera `prestashop/prestashop:8.2.8-8.1-apache` z PHP 8.1
 - MariaDB 10.11 (obraz `mariadb:10.11`)
 - Mailpit 1.34.0 (obraz `axllent/mailpit:v1.34.0`)
+- nginx 1.30.6 (obraz `nginx:1.30.6`) jako proxy HTTPS
 
 ## Uruchomienie
 
-Potrzebny jest Docker z Docker Compose v2. Wszystkie komendy uruchamiamy z katalogu głównego repozytorium.
+Potrzebny jest Docker z Docker Compose v2 w wersji 2.17 lub nowszej. Porty 80 i 443 na komputerze muszą być wolne, bo proxy publikuje je na hoście, a sklep nie ma własnego portu. Wszystkie komendy uruchamiamy z katalogu głównego repozytorium.
 
 1. Skopiuj plik ze zmiennymi i wpisz w nim własne hasła oraz klucz `PS_WS_KEY` (32 znaki alfanumeryczne). Hasło administratora musi mieć od 8 do 72 znaków.
 
@@ -27,15 +28,19 @@ Potrzebny jest Docker z Docker Compose v2. Wszystkie komendy uruchamiamy z katal
    docker compose -f deploy/compose.yaml up -d --wait
    ```
 
-Pierwsze uruchomienie pobiera obrazy i instaluje sklep po polsku bez kreatora, co może potrwać kilka minut. Komenda kończy się, gdy baza i sklep są gotowe. Instalacja wgrywa też produkty demonstracyjne PrestaShop.
+Pierwsze uruchomienie pobiera obrazy i instaluje sklep po polsku bez kreatora, co może potrwać kilka minut. Komenda kończy się, gdy baza, sklep i proxy są gotowe. Przy pierwszym uruchomieniu proxy generuje certyfikat self-signed do wolumenu `proxy-certs`. Instalacja wgrywa też produkty demonstracyjne PrestaShop.
 
-- Sklep: http://localhost:8080
-- Panel administracyjny: `http://localhost:8080/<PS_FOLDER_ADMIN>/`, logowanie wartościami `ADMIN_MAIL` i `ADMIN_PASSWD` z `deploy/.env`
+- Sklep: https://localhost
+- Panel administracyjny: `https://localhost/<PS_FOLDER_ADMIN>/`, logowanie wartościami `ADMIN_MAIL` i `ADMIN_PASSWD` z `deploy/.env`
 - Interfejs WWW Mailpit z pocztą wysłaną przez sklep: http://localhost:8025
+
+Adres `http://localhost` przekierowuje kodem 301 na HTTPS. Przeglądarka ostrzega o certyfikacie self-signed, dopóki go nie zaakceptujesz.
 
 Compose szuka pliku `.env` w katalogu pliku podanego w `-f`, dlatego plik leży w `deploy/`. Pozostałe komendy, np. `ps`, `logs` i `down`, też wymagają `-f deploy/compose.yaml` i pliku `deploy/.env`.
 
-Dane bazy i plików sklepu leżą w nazwanych wolumenach Dockera, a nie w katalogu repozytorium. Komenda `docker compose -f deploy/compose.yaml down` zatrzymuje sklep i zachowuje dane. Wartości z `deploy/.env` działają tylko przy pierwszej instalacji. Żeby je zmienić, zacząć od czystego sklepu albo powtórzyć przerwaną pierwszą instalację, uruchom `docker compose -f deploy/compose.yaml down -v`, a potem komendę z kroku 2. Opcja `-v` usuwa wszystkie dane sklepu.
+Dane bazy i plików sklepu leżą w nazwanych wolumenach Dockera, a nie w katalogu repozytorium. Komenda `docker compose -f deploy/compose.yaml down` zatrzymuje sklep i zachowuje dane. Wartości z `deploy/.env` działają tylko przy pierwszej instalacji. Żeby je zmienić, zacząć od czystego sklepu albo powtórzyć przerwaną pierwszą instalację, uruchom `docker compose -f deploy/compose.yaml down -v`, a potem komendę z kroku 2. Opcja `-v` usuwa wszystkie dane sklepu i certyfikat, a proxy wygeneruje nowy przy następnym starcie.
+
+Sklep zainstalowany przed dodaniem proxy ma w bazie `localhost:8080` i wyłączone SSL, bo `PS_DOMAIN` i `PS_ENABLE_SSL` działają tylko przy pierwszej instalacji. Taki sklep wymaga jednorazowo `down -v` i ponownego kroku 2.
 
 Cała poczta sklepu trafia do Mailpit i nigdy na prawdziwe adresy. Ustawienia SMTP zapisuje skrypt `deploy/init-scripts/configure-mail.sh` przy starcie kontenera sklepu, więc nie wyklikujemy ich ręcznie. Mailpit trzyma wiadomości tylko do restartu swojego kontenera, dlatego nie restartuj go między rejestracją konta a pokazaniem wiadomości powitalnej. Port 8025 na hoście musi być wolny.
 ### Konfiguracja Webservice i import kategorii
