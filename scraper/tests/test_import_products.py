@@ -327,13 +327,13 @@ class FakeProductShopSession:
         (149.99, 23),
     ],
 )
-def test_compute_net_price_round_trip_within_one_grosz(gross: float, vat_rate: int) -> None:
+def test_compute_net_price_round_trip_exact(gross: float, vat_rate: int) -> None:
     net_str = compute_net_price(gross, vat_rate)
     net = Decimal(net_str)
     recomputed_gross = (net * (Decimal("1") + Decimal(vat_rate) / Decimal("100"))).quantize(
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )
-    assert abs(recomputed_gross - Decimal(str(gross))) <= Decimal("0.01")
+    assert recomputed_gross == Decimal(str(gross)).quantize(Decimal("0.01"))
 
 
 def test_compute_net_price_round_trip_for_all_scraped_products() -> None:
@@ -344,13 +344,13 @@ def test_compute_net_price_round_trip_for_all_scraped_products() -> None:
     )
     assert len(products) > 0
     for product in products:
-        gross = Decimal(str(product["price_gross"]))
+        gross = Decimal(str(product["price_gross"])).quantize(Decimal("0.01"))
         vat_rate = int(product["vat_rate"])
         net = Decimal(compute_net_price(gross, vat_rate))
         recomputed = (net * (Decimal("1") + Decimal(vat_rate) / Decimal("100"))).quantize(
             Decimal("0.01"), rounding=ROUND_HALF_UP
         )
-        assert abs(recomputed - gross) <= Decimal("0.01"), f"Mismatch for DK-{product['id']}"
+        assert recomputed == gross, f"Mismatch for DK-{product['id']}"
 
 
 def test_parse_vat_group_map_prefers_active_pl_groups() -> None:
