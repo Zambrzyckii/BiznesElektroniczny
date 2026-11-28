@@ -5,43 +5,31 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
-import re
 import sys
-import unicodedata
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
 import requests
 
+from webservice_client import (
+    extract_multilang_text,
+    raise_for_status_with_body,
+    resolve_ws_config,
+    set_element_text,
+    set_multilang_text,
+)
+from webservice_client import slugify as _slugify
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_CATEGORIES_PATH = Path(__file__).resolve().parent.parent / "scraper-results" / "categories.json"
-DEFAULT_SHOP_URL = "http://localhost:8080"
+CATEGORY_READONLY_TAGS = ("level_depth", "nb_products_recursive", "associations")
 
 
 def slugify(text: str) -> str:
     """Convert a category name into a lowercase ASCII URL slug."""
-    normalized = text.replace("ł", "l").replace("Ł", "L")
-    ascii_text = unicodedata.normalize("NFKD", normalized).encode("ascii", "ignore").decode("ascii")
-    slug = re.sub(r"[^a-z0-9]+", "-", ascii_text.lower()).strip("-")
-    return slug or "category"
-
-
-def _extract_category_name(node: ET.Element) -> str:
-    """Return the first non-empty localized name or plain <name> text."""
-    name_el = node.find("name")
-    if name_el is None:
-        return ""
-    lang_els = name_el.findall("language")
-    if lang_els:
-        for lang_el in lang_els:
-            text = (lang_el.text or "").strip()
-            if text:
-                return text
-        return ""
-    return (name_el.text or "").strip()
+    return _slugify(text, fallback="category")
 
 
 def parse_existing_categories(xml_bytes: bytes) -> tuple[str, dict[tuple[str, str], str]]:
@@ -58,7 +46,7 @@ def parse_existing_categories(xml_bytes: bytes) -> tuple[str, dict[tuple[str, st
         cat_id = (node.findtext("id") or "").strip()
         id_parent = (node.findtext("id_parent") or "").strip()
         is_root = (node.findtext("is_root_category") or "").strip()
-        name = _extract_category_name(node)
+        name = extract_multilang_text(node, "name")
 
         if is_root == "1" and cat_id and home_id is None:
             home_id = cat_id
@@ -69,35 +57,13 @@ def parse_existing_categories(xml_bytes: bytes) -> tuple[str, dict[tuple[str, st
     return (home_id or "2"), existing
 
 
-def _set_element_text(parent: ET.Element, tag: str, value: str) -> None:
-    """Set text on a child element, creating it if missing."""
-    el = parent.find(tag)
-    if el is None:
-        el = ET.SubElement(parent, tag)
-    el.text = value
-
-
-def _set_multilang_text(parent: ET.Element, tag: str, value: str) -> None:
-    """Populate all <language> children inside a field, or its text if none exist."""
-    el = parent.find(tag)
-    if el is None:
-        el = ET.SubElement(parent, tag)
-    languages = el.findall("language")
-    if languages:
-        for lang_el in languages:
-            lang_el.text = value
-    else:
-        el.text = value
-
-
 def build_category_xml(
     blank_xml_bytes: bytes,
     name: str,
     id_parent: str,
     position: int,
-    category_id: str | None = None,
 ) -> bytes:
-    """Build a UTF-8 XML payload for creating or updating a PrestaShop category."""
+    """Build a UTF-8 XML payload for creating a PrestaShop category."""
     root = ET.fromstring(blank_xml_bytes)
     category = root.find("./category")
     if category is None:
@@ -108,20 +74,41 @@ def build_category_xml(
         category.remove(associations)
 
     id_el = category.find("id")
-    if category_id is not None:
-        if id_el is None:
-            id_el = ET.SubElement(category, "id")
-        id_el.text = str(category_id)
-    elif id_el is not None:
+    if id_el is not None:
         category.remove(id_el)
 
-    _set_element_text(category, "id_parent", str(id_parent))
-    _set_element_text(category, "active", "1")
-    _set_element_text(category, "is_root_category", "0")
-    _set_element_text(category, "id_shop_default", "1")
-    _set_element_text(category, "position", str(position))
-    _set_multilang_text(category, "name", name)
-    _set_multilang_text(category, "link_rewrite", slugify(name))
+    set_element_text(category, "id_parent", str(id_parent))
+    set_element_text(category, "active", "1")
+    set_element_text(category, "is_root_category", "0")
+    set_element_text(category, "id_shop_default", "1")
+    set_element_text(category, "position", str(position))
+    set_multilang_text(category, "name", name)
+    set_multilang_text(category, "link_rewrite", slugify(name))
+
+    return ET.tostring(root, encoding="utf-8", xml_declaration=True)
+
+
+def update_category_xml(
+    existing_xml_bytes: bytes,
+    name: str,
+    id_parent: str,
+    position: int,
+) -> bytes:
+    """Update only importer-managed fields on an existing category XML payload."""
+    root = ET.fromstring(existing_xml_bytes)
+    category = root.find("./category")
+    if category is None:
+        raise ValueError("Existing category XML does not contain ./category")
+
+    for tag in CATEGORY_READONLY_TAGS:
+        el = category.find(tag)
+        if el is not None:
+            category.remove(el)
+
+    set_element_text(category, "id_parent", str(id_parent))
+    set_element_text(category, "position", str(position))
+    set_multilang_text(category, "name", name)
+    set_multilang_text(category, "link_rewrite", slugify(name))
 
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
@@ -142,14 +129,16 @@ def _upsert_category(
     existing_id = existing.get(key)
 
     if existing_id is not None:
-        payload = build_category_xml(blank_xml, name, id_parent, position, category_id=existing_id)
+        get_resp = session.get(f"{base_url}/api/categories/{existing_id}", timeout=timeout)
+        raise_for_status_with_body(get_resp)
+        payload = update_category_xml(get_resp.content, name, id_parent, position)
         resp = session.put(
             f"{base_url}/api/categories/{existing_id}",
             data=payload,
             headers=headers,
             timeout=timeout,
         )
-        resp.raise_for_status()
+        raise_for_status_with_body(resp)
         return existing_id, False
 
     payload = build_category_xml(blank_xml, name, id_parent, position)
@@ -159,7 +148,7 @@ def _upsert_category(
         headers=headers,
         timeout=timeout,
     )
-    resp.raise_for_status()
+    raise_for_status_with_body(resp)
 
     resp_root = ET.fromstring(resp.content)
     new_id = (resp_root.findtext("./category/id") or "").strip()
@@ -179,11 +168,11 @@ def import_categories(
     base_url = shop_url.rstrip("/")
 
     blank_resp = session.get(f"{base_url}/api/categories?schema=blank", timeout=timeout)
-    blank_resp.raise_for_status()
+    raise_for_status_with_body(blank_resp)
     blank_xml = blank_resp.content
 
     list_resp = session.get(f"{base_url}/api/categories?display=full", timeout=timeout)
-    list_resp.raise_for_status()
+    raise_for_status_with_body(list_resp)
     home_id, existing = parse_existing_categories(list_resp.content)
 
     created = 0
@@ -224,21 +213,21 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--shop-url",
-        default=os.environ.get("PS_SHOP_URL", DEFAULT_SHOP_URL),
+        default=None,
         help="Base URL of the PrestaShop instance.",
     )
     args = parser.parse_args(argv)
 
-    ws_key = os.environ.get("PS_WS_KEY", "").strip()
+    ws_key, shop_url = resolve_ws_config(args.shop_url)
     if not ws_key:
-        logger.error("PS_WS_KEY environment variable is required")
+        logger.error("PS_WS_KEY is required (set in environment or deploy/.env)")
         return 1
 
     try:
         categories = json.loads(args.categories.read_text(encoding="utf-8"))
         with requests.Session() as session:
             session.auth = (ws_key, "")
-            import_categories(session, args.shop_url, categories)
+            import_categories(session, shop_url, categories)
     except (requests.RequestException, OSError, ET.ParseError, ValueError) as exc:
         logger.error("Category import failed: %s", exc)
         return 1

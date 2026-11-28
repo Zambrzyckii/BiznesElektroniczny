@@ -38,23 +38,30 @@ Compose szuka pliku `.env` w katalogu pliku podanego w `-f`, dlatego plik leży 
 Dane bazy i plików sklepu leżą w nazwanych wolumenach Dockera, a nie w katalogu repozytorium. Komenda `docker compose -f deploy/compose.yaml down` zatrzymuje sklep i zachowuje dane. Wartości z `deploy/.env` działają tylko przy pierwszej instalacji. Żeby je zmienić, zacząć od czystego sklepu albo powtórzyć przerwaną pierwszą instalację, uruchom `docker compose -f deploy/compose.yaml down -v`, a potem komendę z kroku 2. Opcja `-v` usuwa wszystkie dane sklepu.
 
 Cała poczta sklepu trafia do Mailpit i nigdy na prawdziwe adresy. Ustawienia SMTP zapisuje skrypt `deploy/init-scripts/configure-mail.sh` przy starcie kontenera sklepu, więc nie wyklikujemy ich ręcznie. Mailpit trzyma wiadomości tylko do restartu swojego kontenera, dlatego nie restartuj go między rejestracją konta a pokazaniem wiadomości powitalnej. Port 8025 na hoście musi być wolny.
-### Konfiguracja Webservice i import kategorii
 
-Gdy sklep jest uruchomiony, włącz Webservice API i zaimportuj drzewo kategorii (wymaga zależności z `scraper/requirements.txt`). Oba polecenia odczytują `PS_WS_KEY` (32 znaki alfanumeryczne) ze zmiennych środowiskowych powłoki - zapisz go w `deploy/.env` i wyeksportuj w powłoce (np. `export PS_WS_KEY=...`).
+### Konfiguracja Webservice i import danych
 
-1. Włącz Webservice i nadaj kluczowi uprawnienia do zasobu `categories` (`GET`, `POST`, `PUT`):
+Gdy sklep jest uruchomiony, włącz Webservice API i zaimportuj kategorie oraz produkty (skrypty Pythona wymagają zależności z `scraper/requirements.txt`). Wszystkie trzy polecenia czytają `PS_WS_KEY` (32 znaki alfanumeryczne), a skrypty importu także `PS_SHOP_URL` (domyślnie `http://localhost:8080`), najpierw ze zmiennych środowiskowych powłoki, a w razie ich braku bezpośrednio jako zwykły tekst z `deploy/.env` — lokalnie wystarczy więc zapisać klucz w `deploy/.env` bez ręcznego `export`.
+
+1. Włącz Webservice i nadaj kluczowi minimalne uprawnienia (`categories` i `products`: `GET`, `POST`, `PUT`; `stock_availables`: `GET`, `PUT`; `tax_rule_groups`, `tax_rules`, `taxes`: `GET`). Skrypt odrzuca klucze inne niż 32 znaki alfanumeryczne oraz przykładową wartość z `deploy/.env.example`:
 
    ```bash
    ./deploy/setup-webservice.sh
    ```
 
-2. Zaimportuj kategorie z `scraper-results/categories.json`:
+2. Zaimportuj kategorie z `scraper-results/categories.json` (obsługuje flagi `--categories` i `--shop-url`):
 
    ```bash
    python scraper/import_categories.py
    ```
 
-Skrypt `scraper/import_categories.py` używa `PS_WS_KEY` i opcjonalnie `PS_SHOP_URL` (domyślnie `http://localhost:8080`). Ścieżkę do pliku i adres sklepu można też podać flagami `--categories` i `--shop-url`. Oba polecenia są idempotentne i można je uruchamiać wielokrotnie.
+3. Zaimportuj produkty z `scraper-results/products.json` z cenami netto/VAT, wagą i stanami magazynowymi (obsługuje flagi `--products`, `--shop-url` i `--stock-seed`, domyślnie `42`):
+
+   ```bash
+   python scraper/import_products.py
+   ```
+
+Wszystkie trzy polecenia są idempotentne i można je uruchamiać wielokrotnie. Produkty są dopasowywane po polu `reference` (`DK-<id>`), a stany magazynowe są losowane deterministycznie w zakresie `0..10`.
 
 ## Struktura repozytorium
 
