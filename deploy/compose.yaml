@@ -16,7 +16,9 @@ services:
       retries: 3
 
   shop:
-    image: prestashop/prestashop:8.2.8-8.1-apache
+    build: ../shop
+    platform: linux/amd64
+    pull_policy: build
     depends_on:
       db:
         condition: service_healthy
