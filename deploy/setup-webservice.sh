@@ -3,7 +3,25 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-: "${PS_WS_KEY:?Set PS_WS_KEY (32 chars) in the environment}"
+if [ -z "${PS_WS_KEY:-}" ] && [ -f "$SCRIPT_DIR/.env" ]; then
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%$'\r'}"
+    case "$line" in
+      ''|'#'*) continue ;;
+      PS_WS_KEY=*)
+        val="${line#PS_WS_KEY=}"
+        if [[ "$val" =~ ^\"(.*)\"$ ]]; then
+          val="${BASH_REMATCH[1]}"
+        elif [[ "$val" =~ ^\'(.*)\'$ ]]; then
+          val="${BASH_REMATCH[1]}"
+        fi
+        export PS_WS_KEY="$val"
+        ;;
+    esac
+  done < "$SCRIPT_DIR/.env"
+fi
+
+: "${PS_WS_KEY:?Set PS_WS_KEY (32 chars) in the environment or deploy/.env}"
 
 run_php() {
   if [ ! -f /var/www/html/config/config.inc.php ]; then
@@ -20,8 +38,12 @@ run_php <<'PHP'
 require_once '/var/www/html/config/config.inc.php';
 
 $key = (string) getenv('PS_WS_KEY');
-if (strlen($key) !== 32) {
-    fwrite(STDERR, "PS_WS_KEY must be exactly 32 characters\n");
+if (strlen($key) !== 32 || !ctype_alnum($key)) {
+    fwrite(STDERR, "PS_WS_KEY must be exactly 32 alphanumeric characters\n");
+    exit(1);
+}
+if ($key === 'ChangeMeWebserviceKey32Chars0001') {
+    fwrite(STDERR, "PS_WS_KEY must not use the example placeholder value\n");
     exit(1);
 }
 
@@ -50,7 +72,16 @@ if (!$account->save()) {
 
 $account->associateTo(1);
 
-if (!WebserviceKey::setPermissionForAccount((int) $account->id, ['categories' => ['GET' => 1, 'POST' => 1, 'PUT' => 1]])) {
+$permissions = [
+    'categories' => ['GET' => 1, 'POST' => 1, 'PUT' => 1],
+    'products' => ['GET' => 1, 'POST' => 1, 'PUT' => 1],
+    'stock_availables' => ['GET' => 1, 'PUT' => 1],
+    'tax_rule_groups' => ['GET' => 1],
+    'tax_rules' => ['GET' => 1],
+    'taxes' => ['GET' => 1],
+];
+
+if (!WebserviceKey::setPermissionForAccount((int) $account->id, $permissions)) {
     fwrite(STDERR, "Failed to set WebserviceKey permissions\n");
     exit(1);
 }
