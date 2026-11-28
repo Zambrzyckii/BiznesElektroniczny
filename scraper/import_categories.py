@@ -24,6 +24,7 @@ from webservice_client import slugify as _slugify
 logger = logging.getLogger(__name__)
 
 DEFAULT_CATEGORIES_PATH = Path(__file__).resolve().parent.parent / "scraper-results" / "categories.json"
+CATEGORY_READONLY_TAGS = ("level_depth", "nb_products_recursive", "associations")
 
 
 def slugify(text: str) -> str:
@@ -99,9 +100,10 @@ def update_category_xml(
     if category is None:
         raise ValueError("Existing category XML does not contain ./category")
 
-    associations = category.find("associations")
-    if associations is not None:
-        category.remove(associations)
+    for tag in CATEGORY_READONLY_TAGS:
+        el = category.find(tag)
+        if el is not None:
+            category.remove(el)
 
     set_element_text(category, "id_parent", str(id_parent))
     set_element_text(category, "position", str(position))

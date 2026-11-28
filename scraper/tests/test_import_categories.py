@@ -170,6 +170,9 @@ class FakeShopSession:
         root = ET.fromstring(data)
         cat_el = root.find("./category")
         assert cat_el is not None
+        assert cat_el.find("level_depth") is None
+        assert cat_el.find("nb_products_recursive") is None
+        assert cat_el.find("associations") is None
         cat_id = (cat_el.findtext("id") or "").strip()
         assert url.endswith(f"/api/categories/{cat_id}")
 
@@ -201,6 +204,8 @@ class FakeShopSession:
         cat_el = ET.SubElement(root, "category")
         ET.SubElement(cat_el, "id").text = item["id"]
         ET.SubElement(cat_el, "id_parent").text = item["id_parent"]
+        ET.SubElement(cat_el, "level_depth").text = "2"
+        ET.SubElement(cat_el, "nb_products_recursive").text = "5"
         ET.SubElement(cat_el, "is_root_category").text = item["is_root_category"]
         ET.SubElement(cat_el, "active").text = item.get("active", "1")
         ET.SubElement(cat_el, "position").text = item.get("position", "0")
