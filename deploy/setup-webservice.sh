@@ -39,18 +39,18 @@ require_once '/var/www/html/config/config.inc.php';
 
 $key = (string) getenv('PS_WS_KEY');
 if (strlen($key) !== 32 || !ctype_alnum($key)) {
-    fwrite(STDERR, "PS_WS_KEY must be exactly 32 alphanumeric characters\n");
+    file_put_contents('php://stderr', "PS_WS_KEY must be exactly 32 alphanumeric characters\n");
     exit(1);
 }
 if ($key === 'ChangeMeWebserviceKey32Chars0001') {
-    fwrite(STDERR, "PS_WS_KEY must not use the example placeholder value\n");
+    file_put_contents('php://stderr', "PS_WS_KEY must not use the example placeholder value\n");
     exit(1);
 }
 
 Context::getContext()->employee = new Employee(1);
 
 if (!Configuration::updateValue('PS_WEBSERVICE', 1)) {
-    fwrite(STDERR, "Failed to enable PS_WEBSERVICE\n");
+    file_put_contents('php://stderr', "Failed to enable PS_WEBSERVICE\n");
     exit(1);
 }
 
@@ -66,7 +66,7 @@ $account->active = true;
 $account->description = 'Scraper import key';
 
 if (!$account->save()) {
-    fwrite(STDERR, "Failed to save WebserviceKey\n");
+    file_put_contents('php://stderr', "Failed to save WebserviceKey\n");
     exit(1);
 }
 
@@ -82,7 +82,7 @@ $permissions = [
 ];
 
 if (!WebserviceKey::setPermissionForAccount((int) $account->id, $permissions)) {
-    fwrite(STDERR, "Failed to set WebserviceKey permissions\n");
+    file_put_contents('php://stderr', "Failed to set WebserviceKey permissions\n");
     exit(1);
 }
 
