@@ -32,9 +32,15 @@ blob-report/
 *.swp
 .DS_Store
 Thumbs.db
-# Chwilowo ignorujemy pliki wygenerowane lokalnie (przed dokończeniem scrapera)
-scraper-results/*
-!scraper-results/.gitkeep
 .claude/settings.local.json
 CLAUDE.local.md
 .claude/worktrees/
+
+# Wyniki scrapera: w repo tylko pliki JSON i 20 przykładowych zdjęć (#27), pełny zbiór zdjęć jest w Releases
+scraper-results/*
+!scraper-results/.gitkeep
+!scraper-results/products.json
+!scraper-results/categories.json
+!scraper-results/sitemap.json
+!scraper-results/images.json
+!scraper-results/sample-images/
